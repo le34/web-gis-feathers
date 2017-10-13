@@ -1,10 +1,10 @@
 // See http://docs.sequelizejs.com/en/latest/docs/models-definition/
 // for more of what you can do here.
-const Sequelize = require('sequelize');
-const DataTypes = Sequelize.DataTypes;
+const Sequelize = require('sequelize')
+const DataTypes = Sequelize.DataTypes
 
 module.exports = function (app) {
-  const sequelizeClient = app.get('sequelizeClient');
+  const sequelizeClient = app.get('sequelizeClient')
   const users = sequelizeClient.define('users', {
     id: {
       type: DataTypes.UUID,
@@ -40,17 +40,17 @@ module.exports = function (app) {
     resetExpires: { type: DataTypes.DATE } // or a long integer
   }, {
     hooks: {
-      beforeCount(options) {
-        options.raw = true;
+      beforeCount (options) {
+        options.raw = true
       }
     }
-  });
+  })
 
   users.associate = function (models) { // eslint-disable-line no-unused-vars
     // Define associations here
     // See http://docs.sequelizejs.com/en/latest/docs/associations/
-    models.users.belongsTo(models.clients);
-  };
+    models.users.belongsTo(models.clients)
+  }
 
-  return users;
-};
+  return users
+}

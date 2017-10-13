@@ -1,10 +1,10 @@
 // See http://docs.sequelizejs.com/en/latest/docs/models-definition/
 // for more of what you can do here.
-const Sequelize = require('sequelize');
-const DataTypes = Sequelize.DataTypes;
+const Sequelize = require('sequelize')
+const DataTypes = Sequelize.DataTypes
 
 module.exports = function (app) {
-  const sequelizeClient = app.get('sequelizeClient');
+  const sequelizeClient = app.get('sequelizeClient')
   const roles = sequelizeClient.define('roles', {
     id: {
       type: DataTypes.UUID,
@@ -19,16 +19,16 @@ module.exports = function (app) {
   },
   {
     hooks: {
-      beforeCount(options) {
-        options.raw = true;
+      beforeCount (options) {
+        options.raw = true
       }
     }
-  });
+  })
 
   roles.associate = function (models) { // eslint-disable-line no-unused-vars
     // Define associations here
     // See http://docs.sequelizejs.com/en/latest/docs/associations/
-  };
+  }
 
-  return roles;
-};
+  return roles
+}

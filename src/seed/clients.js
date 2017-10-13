@@ -124,7 +124,7 @@ const clients = [
     type: 'opdragsgiver',
     clients: ['7c830e38-9903-44e6-98f7-7f79941b16ff']
   }
-];
+]
 
 module.exports = clients.map(client => {
   return {
@@ -135,5 +135,5 @@ module.exports = clients.map(client => {
       type: client.type,
       clients: client.clients
     }
-  };
-});
+  }
+})

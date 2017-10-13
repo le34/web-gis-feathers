@@ -1,18 +1,18 @@
-const authentication = require('feathers-authentication');
-const jwt = require('feathers-authentication-jwt');
-const local = require('feathers-authentication-local');
-const authManagement = require('feathers-authentication-management');
-const notifier = require('./notifier');
+const authentication = require('feathers-authentication')
+const jwt = require('feathers-authentication-jwt')
+const local = require('feathers-authentication-local')
+const authManagement = require('feathers-authentication-management')
+const notifier = require('./notifier')
 
 module.exports = function () {
-  const app = this;
-  const config = app.get('authentication');
+  const app = this
+  const config = app.get('authentication')
 
   // Set up authentication with the secret
-  app.configure(authentication(config));
-  app.configure(jwt());
-  app.configure(local());
-  app.configure(authManagement(notifier(app)));
+  app.configure(authentication(config))
+  app.configure(jwt())
+  app.configure(local())
+  app.configure(authManagement(notifier(app)))
   // The `authentication` service is used to create a JWT.
   // The before `create` hook registers strategies that can be used
   // to create a new valid JWT (e.g. local or oauth2)
@@ -25,5 +25,5 @@ module.exports = function () {
         authentication.hooks.authenticate('jwt')
       ]
     }
-  });
-};
+  })
+}

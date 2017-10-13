@@ -22,15 +22,18 @@
     "yarn": ">= 0.18.0"
   },
   "scripts": {
+    "dev": "backpack",
+    "build": "backpack build",
     "test": "npm run eslint && npm run mocha",
-    "eslint": "eslint src/. test/. --config .eslintrc.json",
-    "start": "node src/",
+    "eslint": "eslint src/.",
+    "start": "cross-env NODE_ENV=production node build/main.js",
     "mocha": "mocha test/ --recursive"
   },
   "dependencies": {
     "body-parser": "^1.18.2",
     "compression": "^1.7.1",
     "cors": "^2.8.4",
+    "cross-env": "^5.0.5",
     "feathers": "^2.2.1",
     "feathers-authentication": "^1.2.7",
     "feathers-authentication-hooks": "^0.1.4",
@@ -54,7 +57,15 @@
     "winston": "^2.3.1"
   },
   "devDependencies": {
+    "babel-eslint": "^8.0.1",
+    "backpack-core": "^0.4.3",
     "eslint": "^4.7.2",
+    "eslint-config-standard": "^10.2.1",
+    "eslint-loader": "^1.9.0",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-node": "^5.2.0",
+    "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-standard": "^3.0.1",
     "mocha": "^3.5.3",
     "request": "^2.83.0",
     "request-promise": "^4.2.2"
