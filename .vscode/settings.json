@@ -1,0 +1,22 @@
+{
+  "editor.tabSize": 2,
+  "eslint.autoFixOnSave": true,
+  "eslint.options": {
+      "extensions": [
+          ".html",
+          ".js",
+          ".vue"
+      ]
+  },
+  "eslint.validate": [
+      {
+          "language": "javascript",
+          "autoFix": true
+      },
+      {
+          "language": "vue",
+          "autoFix": true
+      }
+  ],
+  "git.enableSmartCommit": true
+}
