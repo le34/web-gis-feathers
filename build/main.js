@@ -69,13 +69,13 @@ module.exports =
 /* 0 */
 /***/ (function(module, exports) {
 
-module.exports = require("sequelize");
+module.exports = require("feathers-authentication");
 
 /***/ }),
 /* 1 */
 /***/ (function(module, exports) {
 
-module.exports = require("feathers-authentication");
+module.exports = require("sequelize");
 
 /***/ }),
 /* 2 */
@@ -262,11 +262,11 @@ const notFound = __webpack_require__(23);
 
 const middleware = __webpack_require__(24);
 const services = __webpack_require__(25);
-const appHooks = __webpack_require__(49);
+const appHooks = __webpack_require__(55);
 
-const authentication = __webpack_require__(51);
+const authentication = __webpack_require__(57);
 
-const sequelize = __webpack_require__(53);
+const sequelize = __webpack_require__(59);
 
 const app = feathers();
 
@@ -392,12 +392,15 @@ const users = __webpack_require__(26);
 const roles = __webpack_require__(37);
 const email = __webpack_require__(41);
 const clients = __webpack_require__(45);
+const cvr = __webpack_require__(49);
+
 module.exports = function () {
   const app = this; // eslint-disable-line no-unused-vars
   app.configure(users);
   app.configure(roles);
   app.configure(email);
   app.configure(clients);
+  app.configure(cvr);
 };
 
 /***/ }),
@@ -439,7 +442,7 @@ module.exports = function () {
 
 // See http://docs.sequelizejs.com/en/latest/docs/models-definition/
 // for more of what you can do here.
-const Sequelize = __webpack_require__(0);
+const Sequelize = __webpack_require__(1);
 const DataTypes = Sequelize.DataTypes;
 
 module.exports = function (app) {
@@ -499,7 +502,7 @@ module.exports = function (app) {
 /* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const { authenticate } = __webpack_require__(1).hooks;
+const { authenticate } = __webpack_require__(0).hooks;
 const commonHooks = __webpack_require__(5);
 const { restrictToOwner } = __webpack_require__(29);
 const { hashPassword } = __webpack_require__(6).hooks;
@@ -705,7 +708,7 @@ module.exports = function () {
 
 // See http://docs.sequelizejs.com/en/latest/docs/models-definition/
 // for more of what you can do here.
-const Sequelize = __webpack_require__(0);
+const Sequelize = __webpack_require__(1);
 const DataTypes = Sequelize.DataTypes;
 
 module.exports = function (app) {
@@ -741,7 +744,7 @@ module.exports = function (app) {
 /* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const { authenticate } = __webpack_require__(1).hooks;
+const { authenticate } = __webpack_require__(0).hooks;
 
 module.exports = {
   before: {
@@ -899,7 +902,7 @@ module.exports = function () {
 
 // See http://docs.sequelizejs.com/en/latest/docs/models-definition/
 // for more of what you can do here.
-const Sequelize = __webpack_require__(0);
+const Sequelize = __webpack_require__(1);
 const DataTypes = Sequelize.DataTypes;
 
 module.exports = function (app) {
@@ -934,7 +937,7 @@ module.exports = function (app) {
 /* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const { authenticate } = __webpack_require__(1).hooks;
+const { authenticate } = __webpack_require__(0).hooks;
 
 module.exports = {
   before: {
@@ -984,8 +987,122 @@ module.exports = function (data, connection, hook) {
 /* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
+// Initializes the `cvr` service on path `/cvr`
+const createService = __webpack_require__(50);
+const createModel = __webpack_require__(51);
+const hooks = __webpack_require__(53);
+const filters = __webpack_require__(54);
+
+module.exports = function () {
+  const app = this;
+  const Model = createModel(app);
+  const paginate = app.get('paginate');
+  const elasticsearch = {
+    index: 'cvr-permanent',
+    type: 'virksomhed'
+  };
+  const options = {
+    id: 'id',
+    Model,
+    elasticsearch,
+    paginate
+
+    // Initialize our service with any options it requires
+  };app.use('/cvr', createService(options));
+
+  // Get our initialized service so that we can register hooks and filters
+  const service = app.service('cvr');
+
+  service.hooks(hooks);
+
+  if (service.filter) {
+    service.filter(filters);
+  }
+};
+
+/***/ }),
+/* 50 */
+/***/ (function(module, exports) {
+
+module.exports = require("feathers-elasticsearch");
+
+/***/ }),
+/* 51 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// See http://docs.sequelizejs.com/en/latest/docs/models-definition/
+// for more of what you can do here.
+const elasticsearch = __webpack_require__(52);
+
+module.exports = function (app) {
+  return new elasticsearch.Client({
+    host: 'http://LE34_CVR_I_SKYEN:33614fd2-976e-4e1a-af11-acaa0e1ec994@distribution.virk.dk',
+    apiVersion: '1.7'
+  });
+};
+
+/***/ }),
+/* 52 */
+/***/ (function(module, exports) {
+
+module.exports = require("elasticsearch");
+
+/***/ }),
+/* 53 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const { authenticate } = __webpack_require__(0).hooks;
+
+module.exports = {
+  before: {
+    all: [authenticate('jwt')],
+    find: [],
+    get: [],
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
+  },
+
+  after: {
+    all: [],
+    find: [],
+    get: [],
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
+  },
+
+  error: {
+    all: [],
+    find: [],
+    get: [],
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
+  }
+};
+
+/***/ }),
+/* 54 */
+/***/ (function(module, exports) {
+
+/* eslint no-console: 1 */
+console.warn('You are using the default filter for the cvr service. For more information about event filters see https://docs.feathersjs.com/api/events.html#event-filtering'); // eslint-disable-line no-console
+
+module.exports = function (data, connection, hook) {
+  // eslint-disable-line no-unused-vars
+  return data;
+};
+
+/***/ }),
+/* 55 */
+/***/ (function(module, exports, __webpack_require__) {
+
 // Application hooks that run for every service
-const logger = __webpack_require__(50);
+const logger = __webpack_require__(56);
 
 module.exports = {
   before: {
@@ -1020,7 +1137,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 50 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // A hook that logs service method before, after and error
@@ -1049,11 +1166,11 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 51 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const authentication = __webpack_require__(1);
-const jwt = __webpack_require__(52);
+const authentication = __webpack_require__(0);
+const jwt = __webpack_require__(58);
 const local = __webpack_require__(6);
 const authManagement = __webpack_require__(7);
 const notifier = __webpack_require__(8);
@@ -1079,17 +1196,17 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 52 */
+/* 58 */
 /***/ (function(module, exports) {
 
 module.exports = require("feathers-authentication-jwt");
 
 /***/ }),
-/* 53 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Sequelize = __webpack_require__(0);
-const seed = __webpack_require__(54);
+const Sequelize = __webpack_require__(1);
+const seed = __webpack_require__(60);
 module.exports = function () {
   const app = this;
   const connectionString = app.get('postgres');
@@ -1125,14 +1242,14 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 54 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
-const rolesData = __webpack_require__(55);
-const usersData = __webpack_require__(56);
-const clientsData = __webpack_require__(57);
+const rolesData = __webpack_require__(61);
+const usersData = __webpack_require__(62);
+const clientsData = __webpack_require__(63);
 
 module.exports = function () {
   const app = this;
@@ -1172,7 +1289,7 @@ function ifEmptyCreate(name, data) {
 }
 
 /***/ }),
-/* 55 */
+/* 61 */
 /***/ (function(module, exports) {
 
 const system = {
@@ -1190,7 +1307,7 @@ const basic = {
 module.exports = [system, admin, basic];
 
 /***/ }),
-/* 56 */
+/* 62 */
 /***/ (function(module, exports) {
 
 const system = {
@@ -1204,7 +1321,7 @@ const system = {
 module.exports = [system];
 
 /***/ }),
-/* 57 */
+/* 63 */
 /***/ (function(module, exports) {
 
 const clients = [{
