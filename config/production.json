@@ -1,4 +1,34 @@
 {
-  "host": "feathers-1-app.feathersjs.com",
-  "port": "PORT"
+  "host": "0.0.0.0",
+  "port": 3030,
+  "public": "../public/",
+  "authentication": {
+    "secret": "e5da0ac97c32343ffc6eb908462d5530b5589605b06ffa6935c2455b5e5f3a7655c80f157d583d9862d2e1186248d62ce0892a1aa18e36ae3479fe7b5d46446986fa1aa3931b465d12ad38319f2623b73ad61c88fed849718172a0e1b636536a3023b4c408b6187d6ba8248c61e20d4f83c4c356505217672aff443a81a61c46de25a78a028f9b017f5b86202343af6a522f1b5aefcd7c6902bae759ee589a87f142d5f5487d17b63cf4997464c10faaec77d187b04a0ac0f0d286bafb8cd81a6f2e2bd667ee2f7a32d3cf07084d110679247c71af98f6e6e5cccee4289a5e7288a366fd376fc117d8202e5bf16c871782c9f6ce39f197138c6ea13d94952772",
+    "strategies": [
+      "jwt",
+      "local"
+    ],
+    "path": "/authentication",
+    "service": "users",
+    "jwt": {
+      "header": {
+        "type": "access"
+      },
+      "audience": "https://survey.le34.dk",
+      "subject": "anonymous",
+      "issuer": "feathers",
+      "algorithm": "HS256",
+      "expiresIn": "1d"
+    },
+    "local": {
+      "entity": "user",
+      "usernameField": "email",
+      "passwordField": "password"
+    }
+  },
+  "mail": {
+    "host": "mail.le34.dk",
+    "port": 25
+  },
+  "postgres": "postgres://postgres:Zxcv1234@db:5432/survey"
 }

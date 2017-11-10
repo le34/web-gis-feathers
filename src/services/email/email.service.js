@@ -7,10 +7,7 @@ module.exports = function () {
   const app = this
 
   // Initialize our service with any options it requires
-  app.use('/email', Mailer(smtpTransport({
-    host: 'mail.le34.dk',
-    port: 26 // 25 DMZ
-  })))
+  app.use('/email', Mailer(smtpTransport(app.get('mail'))))
   // Get our initialized service so that we can register hooks and filters
   const service = app.service('email')
 

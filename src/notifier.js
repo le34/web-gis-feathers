@@ -4,8 +4,8 @@ const isProd = process.env.NODE_ENV === 'production'
 const returnEmail = 'noreply@le34.dk'
 module.exports = function (app) {
   function getLink (type, hash) {
-    var port = ':3000'
-    var host = 'localhost'
+    var port = isProd ? '' : ':3000'
+    var host = isProd ? 'survey.le34.dk' : 'localhost'
     var protocal = isProd ? 'https' : 'http'
     protocal += '://'
     return `${protocal}${host}${port}/${type}/${hash}`

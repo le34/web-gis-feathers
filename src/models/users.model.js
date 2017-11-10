@@ -49,7 +49,7 @@ module.exports = function (app) {
   users.associate = function (models) { // eslint-disable-line no-unused-vars
     // Define associations here
     // See http://docs.sequelizejs.com/en/latest/docs/associations/
-    models.users.belongsTo(models.clients)
+    models.users.belongsTo(models.company)
   }
 
   return users

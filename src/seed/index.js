@@ -1,13 +1,15 @@
 const rolesData = require('./roles.js')
 const usersData = require('./users.js')
-const clientsData = require('./clients.js')
+const companyData = require('./company.js')
+const Tiler = require('../tiler.js')
 
 module.exports = function () {
   const app = this
   const ifEmptyCreate2 = ifEmptyCreate.bind(this)
   app.configure(ifEmptyCreate2('roles', rolesData))
   app.configure(ifEmptyCreate2('users', usersData))
-  app.configure(ifEmptyCreate2('clients', clientsData))
+  app.configure(ifEmptyCreate2('company', companyData))
+  app.configure(tile)
 }
 
 // ### ifEmptyCreate(model, data)
@@ -31,4 +33,21 @@ function ifEmptyCreate (name, data) {
       if (err) { console.log('trouble seeding ' + name + ': ', err) }
     }
   }
+}
+function tile () {
+  const service = this.service('data')
+  return service.find({
+    query: {
+      progress: {
+        $lt: 100
+      }
+    }
+  }).then(data => {
+    data.forEach(item => {
+      const tiler = new Tiler(item, service)
+      tiler.create()
+    })
+  }).catch(function (error) {
+    console.error(error)
+  })
 }

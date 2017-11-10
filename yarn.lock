@@ -2,6 +2,93 @@
 # yarn lockfile v1
 
 
+"@mapbox/mbtiles@^0.9.0":
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/@mapbox/mbtiles/-/mbtiles-0.9.0.tgz#35ee164fd96c8b8b2d1d945f2c47e833de8a16f1"
+  dependencies:
+    "@mapbox/sphericalmercator" "~1.0.1"
+    "@mapbox/tiletype" "0.3.x"
+    d3-queue "~2.0.3"
+    sqlite3 "3.x"
+
+"@mapbox/point-geometry@0.1.0", "@mapbox/point-geometry@~0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@mapbox/point-geometry/-/point-geometry-0.1.0.tgz#8a83f9335c7860effa2eeeca254332aa0aeed8f2"
+
+"@mapbox/sphericalmercator@~1.0.1":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@mapbox/sphericalmercator/-/sphericalmercator-1.0.5.tgz#70237b9774095ed1cfdbcea7a8fd1fc82b2691f2"
+
+"@mapbox/tiletype@0.3.x":
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/@mapbox/tiletype/-/tiletype-0.3.1.tgz#1a1498f6a1b777630e0b4d3a2fed9d94959560cc"
+
+"@mapbox/vector-tile@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@mapbox/vector-tile/-/vector-tile-1.3.0.tgz#c495f972525befccefcd838f45ffa37ef3b70fe8"
+  dependencies:
+    "@mapbox/point-geometry" "~0.1.0"
+
+"@turf/bbox@^5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@turf/bbox/-/bbox-5.0.0.tgz#c179e533328120ca29b5dbd215a5f54e5c7940d3"
+  dependencies:
+    "@turf/helpers" "5.0.0"
+    "@turf/meta" "5.0.0"
+
+"@turf/center-of-mass@^4.7.3":
+  version "4.7.3"
+  resolved "https://registry.yarnpkg.com/@turf/center-of-mass/-/center-of-mass-4.7.3.tgz#67a665c704e334bcff8e2897755fbc2bb327bc9b"
+  dependencies:
+    "@turf/centroid" "^4.7.3"
+    "@turf/convex" "^4.7.3"
+    "@turf/explode" "^4.7.3"
+    "@turf/helpers" "^4.7.3"
+    "@turf/invariant" "^4.7.3"
+    "@turf/meta" "^4.7.3"
+
+"@turf/centroid@^4.7.3":
+  version "4.7.3"
+  resolved "https://registry.yarnpkg.com/@turf/centroid/-/centroid-4.7.3.tgz#205a7675719b0c8e175bb7565c5d6fe267d88175"
+  dependencies:
+    "@turf/helpers" "^4.7.3"
+    "@turf/meta" "^4.7.3"
+
+"@turf/convex@^4.7.3":
+  version "4.7.3"
+  resolved "https://registry.yarnpkg.com/@turf/convex/-/convex-4.7.3.tgz#1e06093d8453fa59c17d6755cb5ec96f4687363a"
+  dependencies:
+    "@turf/helpers" "^4.7.3"
+    "@turf/meta" "^4.7.3"
+    convex-hull "^1.0.3"
+
+"@turf/explode@^4.7.3":
+  version "4.7.3"
+  resolved "https://registry.yarnpkg.com/@turf/explode/-/explode-4.7.3.tgz#f7e2efb25aea03410cce1e9816584ba94fc91846"
+  dependencies:
+    "@turf/helpers" "^4.7.3"
+    "@turf/meta" "^4.7.3"
+
+"@turf/helpers@5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@turf/helpers/-/helpers-5.0.0.tgz#732cb570e6aebca9ef7375e8e42fafa8e16e5d47"
+
+"@turf/helpers@^4.7.3":
+  version "4.7.3"
+  resolved "https://registry.yarnpkg.com/@turf/helpers/-/helpers-4.7.3.tgz#bc312ac43cab3c532a483151c4c382c5649429e9"
+
+"@turf/invariant@^4.7.3":
+  version "4.7.3"
+  resolved "https://registry.yarnpkg.com/@turf/invariant/-/invariant-4.7.3.tgz#538f367d23c113fc849d70c9a524b8563874601d"
+
+"@turf/meta@5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@turf/meta/-/meta-5.0.0.tgz#75b100e9854cd7b2fa63e68561e1298dac09d7b4"
+
+"@turf/meta@^4.7.3":
+  version "4.7.4"
+  resolved "https://registry.yarnpkg.com/@turf/meta/-/meta-4.7.4.tgz#6de2f1e9890b8f64b669e4b47c09b20893063977"
+
 "@types/express-serve-static-core@*":
   version "4.0.53"
   resolved "https://registry.yarnpkg.com/@types/express-serve-static-core/-/express-serve-static-core-4.0.53.tgz#1723a35d1447f2c55e13c8721eab3448e42f4d82"
@@ -87,6 +174,12 @@ acorn@^4.0.3, acorn@^4.0.4, acorn@~4.0.2:
 acorn@^5.0.0, acorn@^5.1.1:
   version "5.1.2"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-5.1.2.tgz#911cb53e036807cf0fa778dc5d370fbd864246d7"
+
+affine-hull@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/affine-hull/-/affine-hull-1.0.0.tgz#763ff1d38d063ceb7e272f17ee4d7bbcaf905c5d"
+  dependencies:
+    robust-orientation "^1.1.3"
 
 after@0.8.2:
   version "0.8.2"
@@ -919,6 +1012,10 @@ binary-extensions@^1.0.0:
   version "1.10.0"
   resolved "https://registry.yarnpkg.com/binary-extensions/-/binary-extensions-1.10.0.tgz#9aeb9a6c5e88638aad171e167f5900abe24835d0"
 
+bit-twiddle@^1.0.0:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/bit-twiddle/-/bit-twiddle-1.0.2.tgz#0c6c1fabe2b23d17173d9a61b7b7093eb9e1769e"
+
 blob@0.0.4:
   version "0.0.4"
   resolved "https://registry.yarnpkg.com/blob/-/blob-0.0.4.tgz#bcf13052ca54463f30f9fc7e95b9a47630a94921"
@@ -1391,6 +1488,14 @@ convert-source-map@^1.5.0:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/convert-source-map/-/convert-source-map-1.5.0.tgz#9acd70851c6d5dfdd93d9282e5edf94a03ff46b5"
 
+convex-hull@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/convex-hull/-/convex-hull-1.0.3.tgz#20a3aa6ce87f4adea2ff7d17971c9fc1c67e1fff"
+  dependencies:
+    affine-hull "^1.0.0"
+    incremental-convex-hull "^1.0.1"
+    monotone-convex-hull-2d "^1.0.1"
+
 cookie-signature@1.0.6:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/cookie-signature/-/cookie-signature-1.0.6.tgz#e303a882b342cc3ee8ca513a79999734dab3ae2c"
@@ -1497,6 +1602,10 @@ cycle@1.0.x:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/cycle/-/cycle-1.0.3.tgz#21e80b2be8580f98b468f379430662b046c34ad2"
 
+d3-queue@~2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/d3-queue/-/d3-queue-2.0.3.tgz#07fbda3acae5358a9c5299aaf880adf0953ed2c2"
+
 d@1:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/d/-/d-1.0.0.tgz#754bb5bfe55451da69a58b94d45f4c5b0462d58f"
@@ -1591,6 +1700,10 @@ detect-indent@^4.0.0:
   resolved "https://registry.yarnpkg.com/detect-indent/-/detect-indent-4.0.0.tgz#f76d064352cdf43a1cb6ce619c4ee3a9475de208"
   dependencies:
     repeating "^2.0.0"
+
+detect-libc@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/detect-libc/-/detect-libc-1.0.2.tgz#71ad5d204bf17a6a6ca8f450c61454066ef461e1"
 
 diff@3.2.0:
   version "3.2.0"
@@ -2251,9 +2364,9 @@ feathers-rest@^1.8.0:
     feathers-errors "^2.0.1"
     qs "^6.4.0"
 
-feathers-sequelize@^2.3.1:
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/feathers-sequelize/-/feathers-sequelize-2.3.1.tgz#5e4ad425d5df3f17c9225fbfc60cd6e3e7d1dd1c"
+feathers-sequelize@^2.3.2:
+  version "2.3.2"
+  resolved "https://registry.yarnpkg.com/feathers-sequelize/-/feathers-sequelize-2.3.2.tgz#49bbd6a7cbc4159536369f2cacb08581e361f8c2"
   dependencies:
     feathers-commons "^0.8.4"
     feathers-errors "^2.0.1"
@@ -2488,6 +2601,10 @@ gauge@~2.7.3:
 generic-pool@^3.1.8:
   version "3.1.8"
   resolved "https://registry.yarnpkg.com/generic-pool/-/generic-pool-3.1.8.tgz#09844b6545bc9177ec218bd35d4ad894c65be271"
+
+geojson-vt@^2.4.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/geojson-vt/-/geojson-vt-2.4.0.tgz#3c1cf44493f35eb4d2c70c95da6550de66072c05"
 
 get-caller-file@^1.0.1:
   version "1.0.2"
@@ -2800,7 +2917,7 @@ iconv-lite@0.4.19, iconv-lite@^0.4.17:
   version "0.4.19"
   resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.19.tgz#f7468f60135f5e5dad3399c0a81be9a1603a082b"
 
-ieee754@^1.1.4:
+ieee754@^1.1.4, ieee754@^1.1.6:
   version "1.1.8"
   resolved "https://registry.yarnpkg.com/ieee754/-/ieee754-1.1.8.tgz#be33d40ac10ef1926701f6f08a2d86fbfd1ad3e4"
 
@@ -2823,6 +2940,13 @@ import-lazy@^2.1.0:
 imurmurhash@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/imurmurhash/-/imurmurhash-0.1.4.tgz#9218b9b2b928a238b13dc4fb6b6d576f231453ea"
+
+incremental-convex-hull@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/incremental-convex-hull/-/incremental-convex-hull-1.0.1.tgz#51428c14cb9d9a6144bfe69b2851fb377334be1e"
+  dependencies:
+    robust-orientation "^1.1.2"
+    simplicial-complex "^1.0.0"
 
 indexof@0.0.1:
   version "0.0.1"
@@ -3577,6 +3701,12 @@ moment@2.x.x, "moment@>= 2.9.0", moment@^2.13.0:
   version "2.19.1"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.19.1.tgz#56da1a2d1cbf01d38b7e1afc31c10bcfa1929167"
 
+monotone-convex-hull-2d@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/monotone-convex-hull-2d/-/monotone-convex-hull-2d-1.0.1.tgz#47f5daeadf3c4afd37764baa1aa8787a40eee08c"
+  dependencies:
+    robust-orientation "^1.1.3"
+
 ms@2.0.0, ms@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.0.0.tgz#5608aeadfc00be6c2901df5f9861788de0d597c8"
@@ -3585,7 +3715,7 @@ mute-stream@0.0.7:
   version "0.0.7"
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-0.0.7.tgz#3075ce93bc21b8fab43e1bc4da7e8115ed1e7bab"
 
-nan@^2.3.0:
+nan@^2.3.0, nan@~2.7.0:
   version "2.7.0"
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.7.0.tgz#d95bf721ec877e08db276ed3fc6eb78f9083ad46"
 
@@ -3633,6 +3763,22 @@ node-pre-gyp@^0.6.36:
   version "0.6.38"
   resolved "https://registry.yarnpkg.com/node-pre-gyp/-/node-pre-gyp-0.6.38.tgz#e92a20f83416415bb4086f6d1fb78b3da73d113d"
   dependencies:
+    hawk "3.1.3"
+    mkdirp "^0.5.1"
+    nopt "^4.0.1"
+    npmlog "^4.0.2"
+    rc "^1.1.7"
+    request "2.81.0"
+    rimraf "^2.6.1"
+    semver "^5.3.0"
+    tar "^2.2.1"
+    tar-pack "^3.4.0"
+
+node-pre-gyp@~0.6.38:
+  version "0.6.39"
+  resolved "https://registry.yarnpkg.com/node-pre-gyp/-/node-pre-gyp-0.6.39.tgz#c00e96860b23c0e1420ac7befc5044e1d78d8649"
+  dependencies:
+    detect-libc "^1.0.2"
     hawk "3.1.3"
     mkdirp "^0.5.1"
     nopt "^4.0.1"
@@ -3961,6 +4107,13 @@ pause@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/pause/-/pause-0.0.1.tgz#1d408b3fdb76923b9543d96fb4c9dfd535d9cb5d"
 
+pbf@^3.0.5:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/pbf/-/pbf-3.1.0.tgz#f70004badcb281761eabb1e76c92f179f08189e9"
+  dependencies:
+    ieee754 "^1.1.6"
+    resolve-protobuf-schema "^2.0.0"
+
 pbkdf2@^3.0.3:
   version "3.0.14"
   resolved "https://registry.yarnpkg.com/pbkdf2/-/pbkdf2-3.0.14.tgz#a35e13c64799b06ce15320f459c230e68e73bade"
@@ -4100,6 +4253,10 @@ promise@^7.0.1:
   resolved "https://registry.yarnpkg.com/promise/-/promise-7.3.1.tgz#064b72602b18f90f29192b8b1bc418ffd1ebd3bf"
   dependencies:
     asap "~2.0.3"
+
+protocol-buffers-schema@^2.0.2:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/protocol-buffers-schema/-/protocol-buffers-schema-2.2.0.tgz#d29c6cd73fb655978fb6989691180db844119f61"
 
 proxy-addr@~2.0.2:
   version "2.0.2"
@@ -4487,6 +4644,12 @@ resolve-from@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/resolve-from/-/resolve-from-1.0.1.tgz#26cbfe935d1aeeeabb29bc3fe5aeb01e93d44226"
 
+resolve-protobuf-schema@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/resolve-protobuf-schema/-/resolve-protobuf-schema-2.0.0.tgz#e67b062a67f02d11bd6886e70efda788407e0fb4"
+  dependencies:
+    protocol-buffers-schema "^2.0.2"
+
 resolve@^1.1.6, resolve@^1.2.0, resolve@^1.3.3:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/resolve/-/resolve-1.4.0.tgz#a75be01c53da25d934a98ebd0e4c4a7312f92a86"
@@ -4525,6 +4688,30 @@ ripemd160@^2.0.0, ripemd160@^2.0.1:
   dependencies:
     hash-base "^2.0.0"
     inherits "^2.0.1"
+
+robust-orientation@^1.1.2, robust-orientation@^1.1.3:
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/robust-orientation/-/robust-orientation-1.1.3.tgz#daff5b00d3be4e60722f0e9c0156ef967f1c2049"
+  dependencies:
+    robust-scale "^1.0.2"
+    robust-subtract "^1.0.0"
+    robust-sum "^1.0.0"
+    two-product "^1.0.2"
+
+robust-scale@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/robust-scale/-/robust-scale-1.0.2.tgz#775132ed09542d028e58b2cc79c06290bcf78c32"
+  dependencies:
+    two-product "^1.0.2"
+    two-sum "^1.0.0"
+
+robust-subtract@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/robust-subtract/-/robust-subtract-1.0.0.tgz#e0b164e1ed8ba4e3a5dda45a12038348dbed3e9a"
+
+robust-sum@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/robust-sum/-/robust-sum-1.0.0.tgz#16646e525292b4d25d82757a286955e0bbfa53d9"
 
 rubberduck@^1.1.1:
   version "1.1.1"
@@ -4590,7 +4777,29 @@ send@0.16.1:
     range-parser "~1.2.0"
     statuses "~1.3.1"
 
-sequelize@^4.13.8, sequelize@^4.3.1:
+sequelize@^4.17.1:
+  version "4.17.1"
+  resolved "https://registry.yarnpkg.com/sequelize/-/sequelize-4.17.1.tgz#f17ee149dc443e42a0207bff4e46dcf9bf35d8b3"
+  dependencies:
+    bluebird "^3.4.6"
+    cls-bluebird "^2.0.1"
+    debug "^3.0.0"
+    depd "^1.1.0"
+    dottie "^2.0.0"
+    generic-pool "^3.1.8"
+    inflection "1.12.0"
+    lodash "^4.17.1"
+    moment "^2.13.0"
+    moment-timezone "^0.5.4"
+    retry-as-promised "^2.3.1"
+    semver "^5.0.1"
+    terraformer-wkt-parser "^1.1.2"
+    toposort-class "^1.0.1"
+    uuid "^3.0.0"
+    validator "^8.0.0"
+    wkx "^0.4.1"
+
+sequelize@^4.3.1:
   version "4.13.10"
   resolved "https://registry.yarnpkg.com/sequelize/-/sequelize-4.13.10.tgz#b102aacc4c317524a972b17587ba681e6a129a78"
   dependencies:
@@ -4675,6 +4884,13 @@ shimmer@^1.1.0:
 signal-exit@^3.0.0, signal-exit@^3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-3.0.2.tgz#b5fdc08f1287ea1178628e415e25132b73646c6d"
+
+simplicial-complex@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/simplicial-complex/-/simplicial-complex-1.0.0.tgz#6c33a4ed69fcd4d91b7bcadd3b30b63683eae241"
+  dependencies:
+    bit-twiddle "^1.0.0"
+    union-find "^1.0.0"
 
 slash@^1.0.0:
   version "1.0.0"
@@ -4796,6 +5012,13 @@ split@^1.0.0:
 sprintf-js@~1.0.2:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
+
+sqlite3@3.x:
+  version "3.1.13"
+  resolved "https://registry.yarnpkg.com/sqlite3/-/sqlite3-3.1.13.tgz#d990a05627392768de6278bafd1a31fdfe907dd9"
+  dependencies:
+    nan "~2.7.0"
+    node-pre-gyp "~0.6.38"
 
 sshpk@^1.7.0:
   version "1.13.1"
@@ -5071,6 +5294,14 @@ tweetnacl@^0.14.3, tweetnacl@~0.14.0:
   version "0.14.5"
   resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-0.14.5.tgz#5ae68177f192d4456269d108afa93ff8743f4f64"
 
+two-product@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/two-product/-/two-product-1.0.2.tgz#67d95d4b257a921e2cb4bd7af9511f9088522eaa"
+
+two-sum@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/two-sum/-/two-sum-1.0.0.tgz#31d3f32239e4f731eca9df9155e2b297f008ab64"
+
 type-check@~0.3.2:
   version "0.3.2"
   resolved "https://registry.yarnpkg.com/type-check/-/type-check-0.3.2.tgz#5884cab512cf1d355e3fb784f30804b2b520db72"
@@ -5128,6 +5359,10 @@ undefsafe@0.0.3:
 underscore@~1.7.0:
   version "1.7.0"
   resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.7.0.tgz#6bbaf0877500d36be34ecaa584e0db9fef035209"
+
+union-find@^1.0.0:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/union-find/-/union-find-1.0.2.tgz#292bac415e6ad3a89535d237010db4a536284e58"
 
 unique-string@^1.0.0:
   version "1.0.0"
@@ -5224,6 +5459,14 @@ vm-browserify@0.0.4:
 void-elements@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/void-elements/-/void-elements-2.0.1.tgz#c066afb582bb1cb4128d60ea92392e94d5e9dbec"
+
+vt-pbf@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/vt-pbf/-/vt-pbf-3.1.0.tgz#d7e63f585b362cbff6b84fcd052c159112e0acc7"
+  dependencies:
+    "@mapbox/point-geometry" "0.1.0"
+    "@mapbox/vector-tile" "^1.3.0"
+    pbf "^3.0.5"
 
 watchpack@^1.4.0:
   version "1.4.0"

@@ -1,16 +1,19 @@
 doctype html
 html
-  body(style='margin: 0;font-family: Tahoma;font-size: 1.2em;background-color: #ECF0F1;')
-    header.text-center(style='padding: 1em;background-color: #34495E;margin-bottom: 1em;text-align: center;')
-      .logo(style='max-width: 33.33%;')
-        img(src='#{logo}')
-    .body(style='padding: 1em;margin-right: auto;margin-left: auto;max-width: 500px;color: #2C3E50;')
-      h1(style='font-family: Palatino;font-size: 1.5em;') Hi, #{name}
-      p(style="color: #34495E;")
-        | Thank you for signing up. Please verify your email so you can reset your password if need be.
-      a.reset-btn(href=hashLink, style='color: #2980B9;display: block;text-align: center;text-decoration: none;padding: 0.5em;font-size: 1.2em;border: 5px solid #2980B9;border-radius: 3px;margin: 1em;margin-right: auto;margin-left: auto;') Verify Email
-      p(style="color: #34495E;")
-        | You may still use the site if your email is unverified but we can't send you emails.
-      p.text-small.margin-2(style='color: grey;font-size: 0.9em;text-align: center;margin-bottom: 0;margin-top: 2em;') If you didn't request this change please
-      p.text-small(style='color: grey;font-size: 0.9em;text-align: center;margin-bottom: 0;')
-        a(href='mailto:' + returnEmail + '?subject=I did not sign up at this site&body=Someone unauthorized signed up with my email.', style='color: #2980B9;') let us know
+  body(style='margin: 0;padding: 2em;font-family: Arial;font-size: 1.2em;background-color: #eee;color: #444')
+    table(cellspacing="0" cellpadding="0" style='width: 500px; border: 0; margin-left: auto; margin-right: auto')
+      tr(style='background-color: #222;')
+        td(width='63px')
+          img(src='https://survey.le34.dk/icon.png' style='display: block; width: 63px')
+        td(align='center' style='color: #fff') SURVEY
+      tr(style='background-color: #fff')
+        td(colspan=2 style='padding: 1.5em')
+          h1(style='font-size: 1.5em;') Hi, #{name}
+          p You have been signing up on #[a(href='https://survey.le34.dk' style='text-decoration: none; color: #444; font-weight: bold') survey.le34.dk] 
+          p Please verify your email and reset your password.
+          a.reset-btn(href=hashLink, style='color: #2980B9;display: block;text-align: center;text-decoration: none;padding: 0.5em;font-size: 1.2em;border: 5px solid #2980B9;border-radius: 3px;margin: 1em;margin-right: auto;margin-left: auto;') Verify Email          
+          p(style='color: grey;font-size: 0.9em;text-align: center;margin-bottom: 0;margin-top: 2em;') If you didn't request this change please
+          p(style='color: grey;font-size: 0.9em;text-align: center;margin-bottom: 0;')
+            a(href='mailto:' + returnEmail + '?subject=I did not sign up at this site&body=Someone unauthorized signed up with my email.', style='color: #2980B9;') let us know
+    p(style='text-align: center;margin-top: 2em;')
+      a(href='https://survey.le34.dk' style='color: grey;font-size: 0.9em;text-align: center;margin-bottom: 0;margin-top: 2em;text-decoration: none') survey.le34.dk

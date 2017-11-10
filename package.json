@@ -22,14 +22,17 @@
     "yarn": ">= 0.18.0"
   },
   "scripts": {
-    "dev": "backpack",
+    "dev": "MBTILES=/Users/runetvilum/develop/GitHub/web-gis-app/mbtiles backpack",
     "build": "backpack build",
     "test": "npm run eslint && npm run mocha",
     "eslint": "eslint src/.",
-    "start": "cross-env NODE_ENV=production node build/main.js",
+    "start": "NODE_ENV=production node build/main.js",
     "mocha": "mocha test/ --recursive"
   },
   "dependencies": {
+    "@mapbox/mbtiles": "^0.9.0",
+    "@turf/bbox": "^5.0.0",
+    "@turf/center-of-mass": "^4.7.3",
     "body-parser": "^1.18.2",
     "compression": "^1.7.1",
     "cors": "^2.8.4",
@@ -48,14 +51,16 @@
     "feathers-hooks-common": "^3.7.3",
     "feathers-mailer": "^2.0.0",
     "feathers-rest": "^1.8.0",
-    "feathers-sequelize": "^2.3.1",
+    "feathers-sequelize": "^2.3.2",
     "feathers-socketio": "^2.0.0",
+    "geojson-vt": "^2.4.0",
     "helmet": "^3.8.2",
     "nodemailer-smtp-transport": "^2.7.4",
     "pg": "^7.3.0",
     "pug": "^2.0.0-rc.4",
-    "sequelize": "^4.13.8",
+    "sequelize": "^4.17.1",
     "serve-favicon": "^2.4.5",
+    "vt-pbf": "^3.1.0",
     "winston": "^2.3.1"
   },
   "devDependencies": {
