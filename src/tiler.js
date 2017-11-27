@@ -20,7 +20,6 @@ function Tiler (data, service) {
 }
 
 Tiler.prototype.remove = function () {
-  console.log('remove', this._mbtilesFile)
   return new Promise((resolve, reject) => {
     fs.unlink(this._mbtilesFile, () => {
       resolve()

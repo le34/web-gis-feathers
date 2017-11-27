@@ -75,13 +75,13 @@ module.exports = require("feathers-authentication");
 /* 1 */
 /***/ (function(module, exports) {
 
-module.exports = require("path");
+module.exports = require("sequelize");
 
 /***/ }),
 /* 2 */
 /***/ (function(module, exports) {
 
-module.exports = require("sequelize");
+module.exports = require("path");
 
 /***/ }),
 /* 3 */
@@ -123,7 +123,7 @@ module.exports = require("feathers-authentication-management");
 /* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(__dirname) {const path = __webpack_require__(1);
+/* WEBPACK VAR INJECTION */(function(__dirname) {const path = __webpack_require__(2);
 const pug = __webpack_require__(33);
 const isProd = "development" === 'production';
 const returnEmail = 'noreply@le34.dk';
@@ -232,7 +232,7 @@ module.exports = function (app) {
 /* eslint no-new: 0 */
 var geojsonvt = __webpack_require__(69);
 var MBTiles = __webpack_require__(70);
-var path = __webpack_require__(1);
+var path = __webpack_require__(2);
 var vtpbf = __webpack_require__(71);
 var zlib = __webpack_require__(72);
 var fs = __webpack_require__(5);
@@ -251,7 +251,6 @@ function Tiler(data, service) {
 }
 
 Tiler.prototype.remove = function () {
-  console.log('remove', this._mbtilesFile);
   return new Promise((resolve, reject) => {
     fs.unlink(this._mbtilesFile, () => {
       resolve();
@@ -384,7 +383,7 @@ server.on('listening', () => logger.info('Feathers application started on http:/
 /* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const path = __webpack_require__(1);
+const path = __webpack_require__(2);
 const favicon = __webpack_require__(14);
 const compress = __webpack_require__(15);
 const cors = __webpack_require__(16);
@@ -402,11 +401,11 @@ const notFound = __webpack_require__(25);
 
 const middleware = __webpack_require__(26);
 const services = __webpack_require__(27);
-const appHooks = __webpack_require__(77);
+const appHooks = __webpack_require__(85);
 
-const authentication = __webpack_require__(79);
+const authentication = __webpack_require__(87);
 
-const sequelize = __webpack_require__(81);
+const sequelize = __webpack_require__(89);
 
 const app = feathers();
 
@@ -540,6 +539,8 @@ const files = __webpack_require__(61);
 
 const data = __webpack_require__(65);
 
+const projects = __webpack_require__(81);
+
 module.exports = function () {
   const app = this; // eslint-disable-line no-unused-vars
   app.configure(users);
@@ -550,6 +551,7 @@ module.exports = function () {
   app.configure(fonts);
   app.configure(files);
   app.configure(data);
+  app.configure(projects);
 };
 
 /***/ }),
@@ -594,7 +596,7 @@ module.exports = function () {
 
 // See http://docs.sequelizejs.com/en/latest/docs/models-definition/
 // for more of what you can do here.
-const Sequelize = __webpack_require__(2);
+const Sequelize = __webpack_require__(1);
 const DataTypes = Sequelize.DataTypes;
 
 module.exports = function (app) {
@@ -860,7 +862,7 @@ module.exports = function () {
 
 // See http://docs.sequelizejs.com/en/latest/docs/models-definition/
 // for more of what you can do here.
-const Sequelize = __webpack_require__(2);
+const Sequelize = __webpack_require__(1);
 const DataTypes = Sequelize.DataTypes;
 
 module.exports = function (app) {
@@ -1051,7 +1053,7 @@ module.exports = function () {
 
 // See http://docs.sequelizejs.com/en/latest/docs/models-definition/
 // for more of what you can do here.
-const Sequelize = __webpack_require__(2);
+const Sequelize = __webpack_require__(1);
 const DataTypes = Sequelize.DataTypes;
 
 module.exports = function (app) {
@@ -1408,7 +1410,7 @@ module.exports = function () {
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(__dirname) {const fs = __webpack_require__(5);
-const path = __webpack_require__(1);
+const path = __webpack_require__(2);
 class Service {
   constructor(options) {
     this.options = options || {};
@@ -1522,7 +1524,7 @@ module.exports = function (data, connection, hook) {
 const createService = __webpack_require__(3);
 const createModel = __webpack_require__(66);
 const hooks = __webpack_require__(67);
-const filters = __webpack_require__(76);
+const filters = __webpack_require__(80);
 
 module.exports = function () {
   const app = this;
@@ -1553,7 +1555,7 @@ module.exports = function () {
 
 // See http://docs.sequelizejs.com/en/latest/docs/models-definition/
 // for more of what you can do here.
-const Sequelize = __webpack_require__(2);
+const Sequelize = __webpack_require__(1);
 const DataTypes = Sequelize.DataTypes;
 
 module.exports = function (app) {
@@ -1591,10 +1593,8 @@ module.exports = function (app) {
 
   data.associate = function (models) {
     // eslint-disable-line no-unused-vars
-    // Define associations here
-    // See http://docs.sequelizejs.com/en/latest/docs/associations/
-    models.data.belongsTo(models.company); // generates companyId
-    models.data.belongsTo(models.company, { as: 'client' }); // generates clientId
+    models.data.belongsTo(models.projects); // generates projectId
+    models.data.belongsTo(models.company); // generates clientId
     models.data.belongsTo(models.users); // generates userId
   };
 
@@ -1609,16 +1609,18 @@ const { authenticate } = __webpack_require__(0).hooks;
 const { discard } = __webpack_require__(4);
 const tile = __webpack_require__(68);
 const removeMbtile = __webpack_require__(75);
-// const dataInclude = require('../../hooks/data-include')
-// const dataIncludeAfter = require('../../hooks/data-include-after')
+const dataBeforeFind = __webpack_require__(76);
+const noReturning = __webpack_require__(77);
+const dataAfterPatch = __webpack_require__(78);
+const dataAfterCreate = __webpack_require__(79);
 module.exports = {
   before: {
     all: [],
-    find: [],
+    find: [dataBeforeFind()],
     get: [],
     create: [authenticate('jwt')],
     update: [authenticate('jwt')],
-    patch: [authenticate('jwt')],
+    patch: [authenticate('jwt'), noReturning()],
     remove: [authenticate('jwt')]
   },
 
@@ -1626,9 +1628,9 @@ module.exports = {
     all: [],
     find: [],
     get: [],
-    create: [tile(), discard('geojson')],
+    create: [tile(), dataAfterCreate()],
     update: [tile(), discard('geojson')],
-    patch: [discard('geojson')],
+    patch: [dataAfterPatch()],
     remove: [removeMbtile(), discard('geojson')]
   },
 
@@ -1705,7 +1707,7 @@ module.exports = require("@turf/center-of-mass");
 // Use this hook to manipulate incoming or outgoing data.
 // For more information on hooks see: http://docs.feathersjs.com/api/hooks.html
 const fs = __webpack_require__(5);
-const path = __webpack_require__(1);
+const path = __webpack_require__(2);
 module.exports = function (options = {}) {
   // eslint-disable-line no-unused-vars
   return function removeMbtile(hook) {
@@ -1720,6 +1722,84 @@ module.exports = function (options = {}) {
 /* 76 */
 /***/ (function(module, exports) {
 
+// Use this hook to manipulate incoming or outgoing data.
+// For more information on hooks see: http://docs.feathersjs.com/api/hooks.html
+
+module.exports = function (options = {}) {
+  // eslint-disable-line no-unused-vars
+  return hook => {
+    console.log(hook.params);
+    hook.params.sequelize = {
+      include: [{ model: hook.app.services.company.Model, attributes: ['data'] }]
+    };
+    return hook;
+  };
+};
+
+/***/ }),
+/* 77 */
+/***/ (function(module, exports) {
+
+// Use this hook to manipulate incoming or outgoing data.
+// For more information on hooks see: http://docs.feathersjs.com/api/hooks.html
+
+module.exports = function (options = {}) {
+  // eslint-disable-line no-unused-vars
+  return hook => {
+    hook.params.$returning = false;
+    return Promise.resolve(hook);
+  };
+};
+
+/***/ }),
+/* 78 */
+/***/ (function(module, exports) {
+
+// Use this hook to manipulate incoming or outgoing data.
+// For more information on hooks see: http://docs.feathersjs.com/api/hooks.html
+
+module.exports = function (options = {}) {
+  // eslint-disable-line no-unused-vars
+  return hook => {
+    hook.bypass = true;
+    return hook.app.service('/data').find({
+      query: {
+        id: hook.id,
+        $select: ['id', 'projectId', 'name', 'createdAt', 'progress']
+      }
+    }).then(result => {
+      hook.result = result[0];
+      return Promise.resolve(hook);
+    });
+  };
+};
+
+/***/ }),
+/* 79 */
+/***/ (function(module, exports) {
+
+// Use this hook to manipulate incoming or outgoing data.
+// For more information on hooks see: http://docs.feathersjs.com/api/hooks.html
+
+module.exports = function (options = {}) {
+  // eslint-disable-line no-unused-vars
+  return hook => {
+    return hook.app.service('/data').find({
+      query: {
+        id: hook.result.id,
+        $select: ['id', 'projectId', 'name', 'createdAt', 'progress']
+      }
+    }).then(result => {
+      hook.result = result[0];
+      return Promise.resolve(hook);
+    });
+  };
+};
+
+/***/ }),
+/* 80 */
+/***/ (function(module, exports) {
+
 /* eslint no-console: 1 */
 console.warn('You are using the default filter for the data service. For more information about event filters see https://docs.feathersjs.com/api/events.html#event-filtering'); // eslint-disable-line no-console
 
@@ -1729,11 +1809,134 @@ module.exports = function (data, connection, hook) {
 };
 
 /***/ }),
-/* 77 */
+/* 81 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// Initializes the `projects` service on path `/projects`
+const createService = __webpack_require__(3);
+const createModel = __webpack_require__(82);
+const hooks = __webpack_require__(83);
+const filters = __webpack_require__(84);
+
+module.exports = function () {
+  const app = this;
+  const Model = createModel(app);
+  const paginate = app.get('paginate');
+
+  const options = {
+    name: 'projects',
+    Model,
+    paginate
+
+    // Initialize our service with any options it requires
+  };app.use('/projects', createService(options));
+
+  // Get our initialized service so that we can register hooks and filters
+  const service = app.service('projects');
+
+  service.hooks(hooks);
+
+  if (service.filter) {
+    service.filter(filters);
+  }
+};
+
+/***/ }),
+/* 82 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// See http://docs.sequelizejs.com/en/latest/docs/models-definition/
+// for more of what you can do here.
+const Sequelize = __webpack_require__(1);
+const DataTypes = Sequelize.DataTypes;
+
+module.exports = function (app) {
+  const sequelizeClient = app.get('sequelizeClient');
+  const projects = sequelizeClient.define('projects', {
+    id: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+      defaultValue: DataTypes.UUIDV4
+    },
+    name: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    public: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false
+    }
+  }, {
+    hooks: {
+      beforeCount(options) {
+        options.raw = true;
+      }
+    }
+  });
+
+  projects.associate = function (models) {
+    // eslint-disable-line no-unused-vars
+    models.projects.belongsTo(models.company); // generates companyId
+  };
+
+  return projects;
+};
+
+/***/ }),
+/* 83 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const { authenticate } = __webpack_require__(0).hooks;
+module.exports = {
+  before: {
+    all: [],
+    find: [],
+    get: [],
+    create: [authenticate('jwt')],
+    update: [authenticate('jwt')],
+    patch: [authenticate('jwt')],
+    remove: [authenticate('jwt')]
+  },
+
+  after: {
+    all: [],
+    find: [],
+    get: [],
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
+  },
+
+  error: {
+    all: [],
+    find: [],
+    get: [],
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
+  }
+};
+
+/***/ }),
+/* 84 */
+/***/ (function(module, exports) {
+
+/* eslint no-console: 1 */
+console.warn('You are using the default filter for the projects service. For more information about event filters see https://docs.feathersjs.com/api/events.html#event-filtering'); // eslint-disable-line no-console
+
+module.exports = function (data, connection, hook) {
+  // eslint-disable-line no-unused-vars
+  return data;
+};
+
+/***/ }),
+/* 85 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Application hooks that run for every service
-const logger = __webpack_require__(78);
+const logger = __webpack_require__(86);
 
 module.exports = {
   before: {
@@ -1768,7 +1971,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 78 */
+/* 86 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // A hook that logs service method before, after and error
@@ -1797,11 +2000,11 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 79 */
+/* 87 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const authentication = __webpack_require__(0);
-const jwt = __webpack_require__(80);
+const jwt = __webpack_require__(88);
 const local = __webpack_require__(7);
 const authManagement = __webpack_require__(8);
 const notifier = __webpack_require__(9);
@@ -1827,23 +2030,23 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 80 */
+/* 88 */
 /***/ (function(module, exports) {
 
 module.exports = require("feathers-authentication-jwt");
 
 /***/ }),
-/* 81 */
+/* 89 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Sequelize = __webpack_require__(2);
-const seed = __webpack_require__(82);
+const Sequelize = __webpack_require__(1);
+const seed = __webpack_require__(90);
 module.exports = function () {
   const app = this;
   const connectionString = app.get('postgres');
   const sequelize = new Sequelize(connectionString, {
     dialect: 'postgres',
-    logging: false,
+    logging: true,
     define: {
       freezeTableName: true
     }
@@ -1873,14 +2076,14 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 82 */
+/* 90 */
 /***/ (function(module, exports, __webpack_require__) {
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
-const rolesData = __webpack_require__(83);
-const usersData = __webpack_require__(84);
-const companyData = __webpack_require__(85);
+const rolesData = __webpack_require__(91);
+const usersData = __webpack_require__(92);
+const companyData = __webpack_require__(93);
 const Tiler = __webpack_require__(10);
 
 module.exports = function () {
@@ -1920,6 +2123,7 @@ function ifEmptyCreate(name, data) {
     }
   });
 }
+
 function tile() {
   const service = this.service('data');
   return service.find({
@@ -1939,7 +2143,7 @@ function tile() {
 }
 
 /***/ }),
-/* 83 */
+/* 91 */
 /***/ (function(module, exports) {
 
 const system = {
@@ -1957,7 +2161,7 @@ const basic = {
 module.exports = [system, admin, basic];
 
 /***/ }),
-/* 84 */
+/* 92 */
 /***/ (function(module, exports) {
 
 const system = {
@@ -1971,7 +2175,7 @@ const system = {
 module.exports = [system];
 
 /***/ }),
-/* 85 */
+/* 93 */
 /***/ (function(module, exports) {
 
 const clients = [{

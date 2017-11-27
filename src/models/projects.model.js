@@ -5,7 +5,7 @@ const DataTypes = Sequelize.DataTypes
 
 module.exports = function (app) {
   const sequelizeClient = app.get('sequelizeClient')
-  const data = sequelizeClient.define('data', {
+  const projects = sequelizeClient.define('projects', {
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
@@ -15,18 +15,9 @@ module.exports = function (app) {
       type: DataTypes.TEXT,
       allowNull: false
     },
-    meta: {
-      type: DataTypes.JSONB,
-      allowNull: true
-    },
-    geojson: {
-      type: DataTypes.JSONB,
+    public: {
+      type: DataTypes.BOOLEAN,
       allowNull: false
-    },
-    progress: {
-      type: DataTypes.FLOAT,
-      allowNull: false,
-      defaultValue: 0
     }
   }, {
     hooks: {
@@ -36,11 +27,9 @@ module.exports = function (app) {
     }
   })
 
-  data.associate = function (models) { // eslint-disable-line no-unused-vars
-    models.data.belongsTo(models.projects) // generates projectId
-    models.data.belongsTo(models.company) // generates clientId
-    models.data.belongsTo(models.users) // generates userId
+  projects.associate = function (models) { // eslint-disable-line no-unused-vars
+    models.projects.belongsTo(models.company) // generates companyId
   }
 
-  return data
+  return projects
 }

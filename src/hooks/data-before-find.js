@@ -3,13 +3,12 @@
 
 module.exports = function (options = {}) { // eslint-disable-line no-unused-vars
   return (hook) => {
+    console.log(hook.params)
     hook.params.sequelize = {
       include: [
-        { model: hook.app.services.users.Model },
-        { model: hook.app.services.company.Model },
-        { model: hook.app.services.company.Model, as: 'client' }
+        { model: hook.app.services.company.Model, attributes: ['data'] }
       ]
     }
-    return Promise.resolve(hook)
+    return hook
   }
 }

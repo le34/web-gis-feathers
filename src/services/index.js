@@ -10,6 +10,8 @@ const files = require('./files/files.service.js')
 
 const data = require('./data/data.service.js')
 
+const projects = require('./projects/projects.service.js')
+
 module.exports = function () {
   const app = this // eslint-disable-line no-unused-vars
   app.configure(users)
@@ -20,4 +22,5 @@ module.exports = function () {
   app.configure(fonts)
   app.configure(files)
   app.configure(data)
+  app.configure(projects)
 }
