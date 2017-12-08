@@ -6,7 +6,7 @@ module.exports = function (options = {}) { // eslint-disable-line no-unused-vars
     return hook.app.service('/data').find({
       query: {
         id: hook.result.id,
-        $select: ['id', 'projectId', 'name', 'createdAt', 'progress']
+        $select: ['id', 'projectId', 'name', 'meta', 'style', 'createdAt', 'progress']
       }
     }).then(result => {
       hook.result = result[0]

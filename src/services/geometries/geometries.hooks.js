@@ -1,9 +1,9 @@
-// const { authenticate } = require('feathers-authentication').hooks
 
+const geometriesBeforeFind = require('../../hooks/geometries-before-find')
 module.exports = {
   before: {
     all: [],
-    find: [],
+    find: [geometriesBeforeFind()],
     get: [],
     create: [],
     update: [],

@@ -1,5 +1,7 @@
 const fs = require('fs')
 const path = require('path')
+const filePath = process.env.MBTILES
+
 class Service {
   constructor (options) {
     this.options = options || {}
@@ -7,14 +9,14 @@ class Service {
 
   find (params) {
     return new Promise((resolve, reject) => {
-      fs.readdir(path.join(__dirname, '../../../mbtiles'), (err, files) => {
+      fs.readdir(filePath, (err, files) => {
         if (err) {
           return reject(err)
         }
         const result = files.filter(file => {
           return path.extname(file) === '.mbtiles'
         }).map(file => {
-          return { name: path.basename(file, path.extname(file)) }
+          return { id: path.basename(file, path.extname(file)) }
         })
         resolve(result)
       })
@@ -22,16 +24,32 @@ class Service {
   }
 
   get (id, params) {
-    return Promise.resolve({
-      id, text: `A new message with ID: ${id}!`
+    console.log(params)
+    return new Promise((resolve, reject) => {
+      fs.readFile(path.join(filePath, id + '.mbtiles'), (err, data) => {
+        if (err) {
+          return reject(err)
+        }
+        resolve(data)
+      })
     })
   }
 
   create (data, params) {
-    if (Array.isArray(data)) {
-      return Promise.all(data.map(current => this.create(current)))
+    console.log('create', data, params)
+    /*
+    if (params.file && data.id) {
+      return new Promise((resolve, reject) => {
+        fs.writeFile(path.join(filePath, data.id + '.mbtiles'), params.file.buffer, err => {
+          if (err) {
+            console.log('file error', err)
+            return reject(err)
+          }
+          return resolve(data)
+        })
+      })
     }
-
+    */
     return Promise.resolve(data)
   }
 

@@ -7,16 +7,18 @@ var zlib = require('zlib')
 var fs = require('fs')
 var bbox = require('@turf/bbox')
 var centerOfMass = require('@turf/center-of-mass')
+const filePath = process.env.MBTILES
 module.exports = Tiler
 
-function Tiler (data, service) {
+function Tiler (id, data, service) {
   this._service = service
   this._features = []
   this._current = 0
   this._last = 0
   this._data = Object.assign({}, data)
+  this._id = id
   // this._mbtilesFile = path.join(__dirname, 'data', data.id + '.mbtiles')
-  this._mbtilesFile = path.join(process.env.MBTILES, data.id + '.mbtiles')
+  this._mbtilesFile = path.join(filePath, id + '.mbtiles')
 }
 
 Tiler.prototype.remove = function () {
@@ -34,7 +36,7 @@ Tiler.prototype.putTile = function () {
       bounds: bbox(this._data.geojson),
       center: [center.geometry.coordinates[0], center.geometry.coordinates[1], 16],
       version: '2',
-      name: this._data.id,
+      name: this._id,
       description: this._data.name,
       type: 'overlay',
       format: 'pbf',
@@ -55,7 +57,7 @@ Tiler.prototype.putTile = function () {
     Promise.resolve().then(() => {
       if (progress > this._last) {
         this._last = progress
-        return this._service.patch(this._data.id, { progress })
+        return this._service.patch(this._id, { progress })
       }
     }).then(() => {
       const item = this._tileIndex.tileCoords[this._current]

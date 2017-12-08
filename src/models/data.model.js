@@ -19,9 +19,9 @@ module.exports = function (app) {
       type: DataTypes.JSONB,
       allowNull: true
     },
-    geojson: {
+    style: {
       type: DataTypes.JSONB,
-      allowNull: false
+      allowNull: true
     },
     progress: {
       type: DataTypes.FLOAT,
@@ -40,6 +40,7 @@ module.exports = function (app) {
     models.data.belongsTo(models.projects) // generates projectId
     models.data.belongsTo(models.company) // generates clientId
     models.data.belongsTo(models.users) // generates userId
+    // models.data.hasMany(models.geometries)
   }
 
   return data

@@ -12,6 +12,10 @@ const data = require('./data/data.service.js')
 
 const projects = require('./projects/projects.service.js')
 
+const geometries = require('./geometries/geometries.service.js')
+
+const totals = require('./totals/totals.service.js')
+
 module.exports = function () {
   const app = this // eslint-disable-line no-unused-vars
   app.configure(users)
@@ -23,4 +27,6 @@ module.exports = function () {
   app.configure(files)
   app.configure(data)
   app.configure(projects)
+  app.configure(geometries)
+  app.configure(totals)
 }

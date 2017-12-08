@@ -45,8 +45,10 @@ function tile () {
     }
   }).then(data => {
     data.forEach(item => {
-      const tiler = new Tiler(item, service)
-      tiler.create()
+      if (item.meta && item.meta === 0) {
+        const tiler = new Tiler(item, service)
+        tiler.create()
+      }
     })
   }).catch(function (error) {
     console.error(error)
