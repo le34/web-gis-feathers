@@ -17,7 +17,7 @@ module.exports = function (app) {
     },
     public: {
       type: DataTypes.BOOLEAN,
-      allowNull: false
+      defaultValue: false
     }
   }, {
     hooks: {
@@ -28,7 +28,8 @@ module.exports = function (app) {
   })
 
   projects.associate = function (models) { // eslint-disable-line no-unused-vars
-    models.projects.belongsTo(models.company) // generates companyId
+    models.projects.belongsTo(models.companies, { onDelete: 'CASCADE' }) // generates companyId
+    models.projects.belongsTo(models.users) // generates userId
   }
 
   return projects

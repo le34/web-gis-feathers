@@ -1,5 +1,4 @@
 const system = {
-  role: 'system',
   email: 'rut@le34.dk',
   password: process.env.PASSWORD || 'admin',
   isVerified: true,

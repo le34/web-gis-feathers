@@ -1,14 +1,13 @@
 const rolesData = require('./roles.js')
 const usersData = require('./users.js')
-const companyData = require('./company.js')
+const companiesData = require('./companies.js')
 const Tiler = require('../tiler.js')
 
-module.exports = function () {
-  const app = this
+module.exports = function (app) {
   const ifEmptyCreate2 = ifEmptyCreate.bind(this)
   app.configure(ifEmptyCreate2('roles', rolesData))
   app.configure(ifEmptyCreate2('users', usersData))
-  app.configure(ifEmptyCreate2('company', companyData))
+  app.configure(ifEmptyCreate2('companies', companiesData))
   app.configure(tile)
 }
 
@@ -36,7 +35,7 @@ function ifEmptyCreate (name, data) {
 }
 
 function tile () {
-  const service = this.service('data')
+  const service = this.service('datasources')
   return service.find({
     query: {
       progress: {

@@ -28,7 +28,7 @@ module.exports = function (app) {
   })
 
   geometries.associate = function (models) { // eslint-disable-line no-unused-vars
-    models.geometries.belongsTo(models.data, {as: 'data', onDelete: 'CASCADE'})
+    models.geometries.belongsTo(models.datasources, { onDelete: 'CASCADE' })
   }
 
   return geometries

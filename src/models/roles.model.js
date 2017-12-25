@@ -11,7 +11,7 @@ module.exports = function (app) {
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4
     },
-    role: {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true

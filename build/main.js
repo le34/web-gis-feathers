@@ -62,7 +62,7 @@ module.exports =
 /******/ 	__webpack_require__.p = "/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 11);
+/******/ 	return __webpack_require__(__webpack_require__.s = 16);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -75,13 +75,13 @@ module.exports = require("sequelize");
 /* 1 */
 /***/ (function(module, exports) {
 
-module.exports = require("feathers-authentication");
+module.exports = require("feathers-sequelize");
 
 /***/ }),
 /* 2 */
 /***/ (function(module, exports) {
 
-module.exports = require("feathers-sequelize");
+module.exports = require("@feathersjs/authentication");
 
 /***/ }),
 /* 3 */
@@ -111,16 +111,22 @@ module.exports = require("feathers-hooks-common");
 /* 7 */
 /***/ (function(module, exports) {
 
-module.exports = require("feathers-authentication-local");
+module.exports = require("feathers-authentication-hooks");
 
 /***/ }),
 /* 8 */
 /***/ (function(module, exports) {
 
-module.exports = require("feathers-authentication-management");
+module.exports = require("@feathersjs/authentication-local");
 
 /***/ }),
 /* 9 */
+/***/ (function(module, exports) {
+
+module.exports = require("feathers-authentication-management");
+
+/***/ }),
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(__dirname) {const path = __webpack_require__(3);
@@ -226,18 +232,18 @@ module.exports = function (app) {
 /* WEBPACK VAR INJECTION */}.call(exports, "src"))
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* eslint no-new: 0 */
-var geojsonvt = __webpack_require__(70);
-var MBTiles = __webpack_require__(71);
+var geojsonvt = __webpack_require__(64);
+var MBTiles = __webpack_require__(65);
 var path = __webpack_require__(3);
-var vtpbf = __webpack_require__(72);
-var zlib = __webpack_require__(73);
+var vtpbf = __webpack_require__(66);
+var zlib = __webpack_require__(67);
 var fs = __webpack_require__(4);
-var bbox = __webpack_require__(74);
-var centerOfMass = __webpack_require__(75);
+var bbox = __webpack_require__(68);
+var centerOfMass = __webpack_require__(69);
 const filePath = process.env.MBTILES;
 module.exports = Tiler;
 
@@ -295,13 +301,14 @@ Tiler.prototype.putTile = function () {
       var tile = this._tileIndex.getTile(item.z, item.x, item.y);
       var layers = {};
       tile.features.forEach(feature => {
-        if (this._features.indexOf(feature.tags.feature) === -1) {
-          this._features.push(feature.tags.feature);
+        let layername = feature.tags.feature || this._id;
+        if (this._features.indexOf(layername) === -1) {
+          this._features.push(layername);
         }
-        if (!layers.hasOwnProperty(feature.tags.feature)) {
-          layers[feature.tags.feature] = [];
+        if (!layers.hasOwnProperty(layername)) {
+          layers[layername] = [];
         }
-        layers[feature.tags.feature].push(feature);
+        layers[layername].push(feature);
       });
       var layers2 = {};
       Object.keys(layers).forEach(key => {
@@ -361,19 +368,54 @@ Tiler.prototype.create = function () {
 };
 
 /***/ }),
-/* 11 */
+/* 12 */
+/***/ (function(module, exports) {
+
+module.exports = require("wellknown");
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports) {
+
+module.exports = require("reproject");
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports) {
+
+module.exports = require("epsg");
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports) {
+
+// Use this hook to manipulate incoming or outgoing data.
+// For more information on hooks see: http://docs.feathersjs.com/api/hooks.html
+
+module.exports = function (options = {}) {
+  // eslint-disable-line no-unused-vars
+  return hook => {
+    return hook.app.service('datasources').get(hook.id).then(result => {
+      hook.params.data = result;
+      return Promise.resolve(hook);
+    });
+  };
+};
+
+/***/ }),
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(12);
+module.exports = __webpack_require__(17);
 
 
 /***/ }),
-/* 12 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* eslint-disable no-console */
 const logger = __webpack_require__(5);
-const app = __webpack_require__(13);
+const app = __webpack_require__(18);
 const port = app.get('port');
 const server = app.listen(port);
 
@@ -382,34 +424,35 @@ process.on('unhandledRejection', (reason, p) => logger.error('Unhandled Rejectio
 server.on('listening', () => logger.info('Feathers application started on http://%s:%d', app.get('host'), port));
 
 /***/ }),
-/* 13 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const path = __webpack_require__(3);
-const favicon = __webpack_require__(14);
-const compress = __webpack_require__(15);
-const cors = __webpack_require__(16);
-const helmet = __webpack_require__(17);
-const bodyParser = __webpack_require__(18);
+const favicon = __webpack_require__(19);
+const compress = __webpack_require__(20);
+const cors = __webpack_require__(21);
+const helmet = __webpack_require__(22);
+const logger = __webpack_require__(5);
 
-const feathers = __webpack_require__(19);
-const configuration = __webpack_require__(20);
-const hooks = __webpack_require__(21);
-const rest = __webpack_require__(22);
-const socketio = __webpack_require__(23);
+const feathers = __webpack_require__(23);
+const configuration = __webpack_require__(24);
+const express = __webpack_require__(25);
+// const rest = require('@feathersjs/express/rest')
+const socketio = __webpack_require__(26);
 
-const handler = __webpack_require__(24);
-const notFound = __webpack_require__(25);
+// const handler = require('@feathersjs/express/errors')
+// const notFound = require('feathers-errors/not-found')
 
-const middleware = __webpack_require__(26);
-const services = __webpack_require__(27);
-const appHooks = __webpack_require__(96);
+const middleware = __webpack_require__(27);
+const services = __webpack_require__(28);
+const appHooks = __webpack_require__(107);
+const channels = __webpack_require__(109);
 
-const authentication = __webpack_require__(98);
+const authentication = __webpack_require__(110);
 
-const sequelize = __webpack_require__(100);
+const sequelize = __webpack_require__(112);
 
-const app = feathers();
+const app = express(feathers());
 
 // Load app configuration
 app.configure(configuration());
@@ -417,106 +460,84 @@ app.configure(configuration());
 app.use(cors());
 app.use(helmet());
 app.use(compress());
-app.use(bodyParser.json({ limit: '1gb' }));
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json({ limit: '1gb' }));
+app.use(express.urlencoded({ extended: true }));
 app.use(favicon(path.join(app.get('public'), 'favicon.ico')));
 // Host the public folder
-app.use('/', feathers.static(app.get('public')));
+app.use('/', express.static(app.get('public')));
 
 // Set up Plugins and providers
-app.configure(hooks());
-app.configure(sequelize);
-app.configure(rest());
+app.configure(express.rest());
 app.configure(socketio());
+
+app.configure(sequelize);
 
 // Configure other middleware (see `middleware/index.js`)
 app.configure(middleware);
 app.configure(authentication);
 // Set up our services (see `services/index.js`)
 app.configure(services);
+// Set up event channels (see channels.js)
+app.configure(channels);
 
 // Configure a middleware for 404s and the error handler
-app.use(notFound());
-app.use(handler());
+app.use(express.notFound());
+app.use(express.errorHandler({ logger }));
 
 app.hooks(appHooks);
 
 module.exports = app;
 
 /***/ }),
-/* 14 */
+/* 19 */
 /***/ (function(module, exports) {
 
 module.exports = require("serve-favicon");
 
 /***/ }),
-/* 15 */
+/* 20 */
 /***/ (function(module, exports) {
 
 module.exports = require("compression");
 
 /***/ }),
-/* 16 */
+/* 21 */
 /***/ (function(module, exports) {
 
 module.exports = require("cors");
 
 /***/ }),
-/* 17 */
+/* 22 */
 /***/ (function(module, exports) {
 
 module.exports = require("helmet");
 
 /***/ }),
-/* 18 */
-/***/ (function(module, exports) {
-
-module.exports = require("body-parser");
-
-/***/ }),
-/* 19 */
-/***/ (function(module, exports) {
-
-module.exports = require("feathers");
-
-/***/ }),
-/* 20 */
-/***/ (function(module, exports) {
-
-module.exports = require("feathers-configuration");
-
-/***/ }),
-/* 21 */
-/***/ (function(module, exports) {
-
-module.exports = require("feathers-hooks");
-
-/***/ }),
-/* 22 */
-/***/ (function(module, exports) {
-
-module.exports = require("feathers-rest");
-
-/***/ }),
 /* 23 */
 /***/ (function(module, exports) {
 
-module.exports = require("feathers-socketio");
+module.exports = require("@feathersjs/feathers");
 
 /***/ }),
 /* 24 */
 /***/ (function(module, exports) {
 
-module.exports = require("feathers-errors/handler");
+module.exports = require("@feathersjs/configuration");
 
 /***/ }),
 /* 25 */
 /***/ (function(module, exports) {
 
-module.exports = require("feathers-errors/not-found");
+module.exports = require("@feathersjs/express");
 
 /***/ }),
 /* 26 */
+/***/ (function(module, exports) {
+
+module.exports = require("@feathersjs/socketio");
+
+/***/ }),
+/* 27 */
 /***/ (function(module, exports) {
 
 module.exports = function () {
@@ -526,54 +547,58 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 27 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const users = __webpack_require__(28);
-const roles = __webpack_require__(39);
-const email = __webpack_require__(43);
-const company = __webpack_require__(47);
-const cvr = __webpack_require__(51);
-
-const fonts = __webpack_require__(57);
-
-const files = __webpack_require__(61);
-
-const data = __webpack_require__(66);
-
-const projects = __webpack_require__(83);
-
-const geometries = __webpack_require__(87);
-
-const totals = __webpack_require__(92);
-
-module.exports = function () {
-  const app = this; // eslint-disable-line no-unused-vars
-  app.configure(users);
-  app.configure(roles);
-  app.configure(email);
-  app.configure(company);
-  app.configure(cvr);
-  app.configure(fonts);
-  app.configure(files);
-  app.configure(data);
-  app.configure(projects);
-  app.configure(geometries);
-  app.configure(totals);
-};
-
-/***/ }),
 /* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
-// Initializes the `users` service on path `/users`
-const createService = __webpack_require__(2);
-const createModel = __webpack_require__(29);
-const hooks = __webpack_require__(30);
-const filters = __webpack_require__(38);
+const users = __webpack_require__(29);
+const roles = __webpack_require__(38);
+const email = __webpack_require__(41);
+const companies = __webpack_require__(45);
+const cvr = __webpack_require__(48);
+const fonts = __webpack_require__(53);
+const files = __webpack_require__(56);
+const datasources = __webpack_require__(60);
+const projects = __webpack_require__(74);
+const geometries = __webpack_require__(79);
+const totals = __webpack_require__(83);
+const db = __webpack_require__(87);
+const extent = __webpack_require__(90);
+const styles = __webpack_require__(93);
+const projectsStyles = __webpack_require__(96);
+const projectsCompanies = __webpack_require__(99);
 
-module.exports = function () {
-  const app = this;
+const clients = __webpack_require__(102);
+
+module.exports = function (app) {
+  app.configure(users);
+  app.configure(roles);
+  app.configure(email);
+  app.configure(companies);
+  app.configure(cvr);
+  app.configure(fonts);
+  app.configure(files);
+  app.configure(datasources);
+  app.configure(projects);
+  app.configure(geometries);
+  app.configure(totals);
+  app.configure(db);
+  app.configure(extent);
+  app.configure(styles);
+  app.configure(projectsStyles);
+  app.configure(projectsCompanies);
+  app.configure(clients);
+};
+
+/***/ }),
+/* 29 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// Initializes the `users` service on path `/users`
+const createService = __webpack_require__(1);
+const createModel = __webpack_require__(30);
+const hooks = __webpack_require__(31);
+
+module.exports = function (app) {
   const Model = createModel(app);
   // const paginate = app.get('paginate')
 
@@ -592,14 +617,10 @@ module.exports = function () {
   const service = app.service('users');
 
   service.hooks(hooks);
-
-  if (service.filter) {
-    service.filter(filters);
-  }
 };
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // See http://docs.sequelizejs.com/en/latest/docs/models-definition/
@@ -629,11 +650,6 @@ module.exports = function (app) {
       type: DataTypes.BOOLEAN,
       defaultValue: true
     },
-    role: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      defaultValue: 'basic'
-    },
     isVerified: { type: DataTypes.BOOLEAN },
     verifyToken: { type: DataTypes.STRING },
     verifyShortToken: { type: DataTypes.STRING },
@@ -654,21 +670,22 @@ module.exports = function (app) {
     // eslint-disable-line no-unused-vars
     // Define associations here
     // See http://docs.sequelizejs.com/en/latest/docs/associations/
-    models.users.belongsTo(models.company);
+    models.users.belongsTo(models.companies);
+    models.users.belongsTo(models.roles);
   };
 
   return users;
 };
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const { authenticate } = __webpack_require__(1).hooks;
+const { authenticate } = __webpack_require__(2).hooks;
 const commonHooks = __webpack_require__(6);
-const { restrictToOwner } = __webpack_require__(31);
-const { hashPassword } = __webpack_require__(7).hooks;
-const verifyHooks = __webpack_require__(8).hooks;
+const { restrictToOwner } = __webpack_require__(7);
+const { hashPassword } = __webpack_require__(8).hooks;
+const verifyHooks = __webpack_require__(9).hooks;
 const restrict = [authenticate('jwt'), restrictToOwner({
   idField: 'id',
   ownerField: 'id'
@@ -676,7 +693,7 @@ const restrict = [authenticate('jwt'), restrictToOwner({
 
 const sendVerificationEmail = __webpack_require__(32);
 
-const userClient = __webpack_require__(34);
+const userBefore = __webpack_require__(34);
 
 const userClientAfter = __webpack_require__(35);
 
@@ -685,8 +702,8 @@ const usersRestrict = __webpack_require__(36);
 module.exports = {
   before: {
     all: [],
-    find: [authenticate('jwt'), userClient()],
-    get: [...restrict],
+    find: [authenticate('jwt'), userBefore()],
+    get: [authenticate('jwt'), userBefore()],
     create: [hashPassword(), verifyHooks.addVerification()],
     update: [commonHooks.disallow('external')],
     patch: [...restrict, commonHooks.iff(commonHooks.isProvider('external'), commonHooks.preventChanges('email', 'isVerified', 'verifyToken', 'verifyShortToken', 'verifyExpires', 'verifyChanges', 'resetToken', 'resetShortToken', 'resetExpires'))],
@@ -715,18 +732,12 @@ module.exports = {
 };
 
 /***/ }),
-/* 31 */
-/***/ (function(module, exports) {
-
-module.exports = require("feathers-authentication-hooks");
-
-/***/ }),
 /* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Use this hook to manipulate incoming or outgoing data.
 // For more information on hooks see: http://docs.feathersjs.com/api/hooks.html
-const accountService = __webpack_require__(9);
+const accountService = __webpack_require__(10);
 module.exports = function (options = {}) {
   // eslint-disable-line no-unused-vars
   return function sendVerificationEmail(hook) {
@@ -756,9 +767,9 @@ module.exports = require("pug");
 
 module.exports = function (options = {}) {
   // eslint-disable-line no-unused-vars
-  return function userClient(hook) {
+  return hook => {
     hook.params.sequelize = {
-      include: [{ model: hook.app.services.company.Model }]
+      include: [{ model: hook.app.services.companies.Model }, { model: hook.app.services.roles.Model }]
     };
     return Promise.resolve(hook);
   };
@@ -817,32 +828,18 @@ module.exports = function (options = {}) {
 /* 37 */
 /***/ (function(module, exports) {
 
-module.exports = require("feathers-errors");
+module.exports = require("@feathersjs/errors");
 
 /***/ }),
 /* 38 */
-/***/ (function(module, exports) {
-
-/* eslint no-console: 1 */
-console.warn('You are using the default filter for the users service. For more information about event filters see https://docs.feathersjs.com/api/events.html#event-filtering'); // eslint-disable-line no-console
-
-module.exports = function (data, connection, hook) {
-  // eslint-disable-line no-unused-vars
-  return data;
-};
-
-/***/ }),
-/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Initializes the `roles` service on path `/roles`
-const createService = __webpack_require__(2);
-const createModel = __webpack_require__(40);
-const hooks = __webpack_require__(41);
-const filters = __webpack_require__(42);
+const createService = __webpack_require__(1);
+const createModel = __webpack_require__(39);
+const hooks = __webpack_require__(40);
 
-module.exports = function () {
-  const app = this;
+module.exports = function (app) {
   const Model = createModel(app);
   const paginate = app.get('paginate');
 
@@ -858,14 +855,10 @@ module.exports = function () {
   const service = app.service('roles');
 
   service.hooks(hooks);
-
-  if (service.filter) {
-    service.filter(filters);
-  }
 };
 
 /***/ }),
-/* 40 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // See http://docs.sequelizejs.com/en/latest/docs/models-definition/
@@ -881,7 +874,7 @@ module.exports = function (app) {
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4
     },
-    role: {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true
@@ -903,10 +896,10 @@ module.exports = function (app) {
 };
 
 /***/ }),
-/* 41 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const { authenticate } = __webpack_require__(1).hooks;
+const { authenticate } = __webpack_require__(2).hooks;
 
 module.exports = {
   before: {
@@ -941,29 +934,15 @@ module.exports = {
 };
 
 /***/ }),
-/* 42 */
-/***/ (function(module, exports) {
-
-/* eslint no-console: 1 */
-console.warn('You are using the default filter for the roles service. For more information about event filters see https://docs.feathersjs.com/api/events.html#event-filtering'); // eslint-disable-line no-console
-
-module.exports = function (data, connection, hook) {
-  // eslint-disable-line no-unused-vars
-  return data;
-};
-
-/***/ }),
-/* 43 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Initializes the `email` service on path `/email`
-const Mailer = __webpack_require__(44);
-const hooks = __webpack_require__(45);
-const smtpTransport = __webpack_require__(46);
+const Mailer = __webpack_require__(42);
+const hooks = __webpack_require__(43);
+const smtpTransport = __webpack_require__(44);
 
-module.exports = function () {
-  const app = this;
-
+module.exports = function (app) {
   // Initialize our service with any options it requires
   app.use('/email', Mailer(smtpTransport(app.get('mail'))));
   // Get our initialized service so that we can register hooks and filters
@@ -973,13 +952,13 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 44 */
+/* 42 */
 /***/ (function(module, exports) {
 
 module.exports = require("feathers-mailer");
 
 /***/ }),
-/* 45 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const { disallow } = __webpack_require__(6);
@@ -1017,46 +996,40 @@ module.exports = {
 };
 
 /***/ }),
-/* 46 */
+/* 44 */
 /***/ (function(module, exports) {
 
 module.exports = require("nodemailer-smtp-transport");
 
 /***/ }),
-/* 47 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Initializes the `company` service on path `/company`
-const createService = __webpack_require__(2);
-const createModel = __webpack_require__(48);
-const hooks = __webpack_require__(49);
-const filters = __webpack_require__(50);
+const createService = __webpack_require__(1);
+const createModel = __webpack_require__(46);
+const hooks = __webpack_require__(47);
 
-module.exports = function () {
-  const app = this;
+module.exports = function (app) {
   const Model = createModel(app);
   const paginate = app.get('paginate');
 
   const options = {
-    name: 'company',
+    name: 'companies',
     Model,
     paginate
 
     // Initialize our service with any options it requires
-  };app.use('/company', createService(options));
+  };app.use('/companies', createService(options));
 
   // Get our initialized service so that we can register hooks and filters
-  const service = app.service('company');
+  const service = app.service('companies');
 
   service.hooks(hooks);
-
-  if (service.filter) {
-    service.filter(filters);
-  }
 };
 
 /***/ }),
-/* 48 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // See http://docs.sequelizejs.com/en/latest/docs/models-definition/
@@ -1066,14 +1039,18 @@ const DataTypes = Sequelize.DataTypes;
 
 module.exports = function (app) {
   const sequelizeClient = app.get('sequelizeClient');
-  const company = sequelizeClient.define('company', {
+  const companies = sequelizeClient.define('companies', {
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4
     },
-    data: {
-      type: DataTypes.JSONB,
+    name: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    cvr: {
+      type: DataTypes.TEXT,
       allowNull: false
     }
   }, {
@@ -1084,19 +1061,19 @@ module.exports = function (app) {
     }
   });
 
-  company.associate = function (models) {// eslint-disable-line no-unused-vars
+  companies.associate = function (models) {// eslint-disable-line no-unused-vars
     // Define associations here
     // See http://docs.sequelizejs.com/en/latest/docs/associations/
   };
 
-  return company;
+  return companies;
 };
 
 /***/ }),
-/* 49 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const { authenticate } = __webpack_require__(1).hooks;
+const { authenticate } = __webpack_require__(2).hooks;
 
 module.exports = {
   before: {
@@ -1131,29 +1108,15 @@ module.exports = {
 };
 
 /***/ }),
-/* 50 */
-/***/ (function(module, exports) {
-
-/* eslint no-console: 1 */
-console.warn('You are using the default filter for the company service. For more information about event filters see https://docs.feathersjs.com/api/events.html#event-filtering'); // eslint-disable-line no-console
-
-module.exports = function (data, connection, hook) {
-  // eslint-disable-line no-unused-vars
-  return data;
-};
-
-/***/ }),
-/* 51 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Initializes the `cvr` service on path `/cvr`
-const createService = __webpack_require__(52);
-const createModel = __webpack_require__(53);
-const hooks = __webpack_require__(55);
-const filters = __webpack_require__(56);
+const createService = __webpack_require__(49);
+const createModel = __webpack_require__(50);
+const hooks = __webpack_require__(52);
 
-module.exports = function () {
-  const app = this;
+module.exports = function (app) {
   const Model = createModel(app);
   const paginate = app.get('paginate');
   const elasticsearch = {
@@ -1173,25 +1136,21 @@ module.exports = function () {
   const service = app.service('cvr');
 
   service.hooks(hooks);
-
-  if (service.filter) {
-    service.filter(filters);
-  }
 };
 
 /***/ }),
-/* 52 */
+/* 49 */
 /***/ (function(module, exports) {
 
 module.exports = require("feathers-elasticsearch");
 
 /***/ }),
-/* 53 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // See http://docs.sequelizejs.com/en/latest/docs/models-definition/
 // for more of what you can do here.
-const elasticsearch = __webpack_require__(54);
+const elasticsearch = __webpack_require__(51);
 
 module.exports = function (app) {
   return new elasticsearch.Client({
@@ -1201,16 +1160,16 @@ module.exports = function (app) {
 };
 
 /***/ }),
-/* 54 */
+/* 51 */
 /***/ (function(module, exports) {
 
 module.exports = require("elasticsearch");
 
 /***/ }),
-/* 55 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const { authenticate } = __webpack_require__(1).hooks;
+const { authenticate } = __webpack_require__(2).hooks;
 
 module.exports = {
   before: {
@@ -1245,28 +1204,14 @@ module.exports = {
 };
 
 /***/ }),
-/* 56 */
-/***/ (function(module, exports) {
-
-/* eslint no-console: 1 */
-console.warn('You are using the default filter for the cvr service. For more information about event filters see https://docs.feathersjs.com/api/events.html#event-filtering'); // eslint-disable-line no-console
-
-module.exports = function (data, connection, hook) {
-  // eslint-disable-line no-unused-vars
-  return data;
-};
-
-/***/ }),
-/* 57 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Initializes the `fonts` service on path `/fonts`
-const createService = __webpack_require__(58);
-const hooks = __webpack_require__(59);
-const filters = __webpack_require__(60);
+const createService = __webpack_require__(54);
+const hooks = __webpack_require__(55);
 
-module.exports = function () {
-  const app = this;
+module.exports = function (app) {
   const paginate = app.get('paginate');
 
   const options = {
@@ -1280,14 +1225,10 @@ module.exports = function () {
   const service = app.service('fonts');
 
   service.hooks(hooks);
-
-  if (service.filter) {
-    service.filter(filters);
-  }
 };
 
 /***/ }),
-/* 58 */
+/* 54 */
 /***/ (function(module, exports) {
 
 /* eslint-disable no-unused-vars */
@@ -1334,10 +1275,10 @@ module.exports = function (options) {
 module.exports.Service = Service;
 
 /***/ }),
-/* 59 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const { authenticate } = __webpack_require__(1).hooks;
+const { authenticate } = __webpack_require__(2).hooks;
 
 module.exports = {
   before: {
@@ -1372,25 +1313,12 @@ module.exports = {
 };
 
 /***/ }),
-/* 60 */
-/***/ (function(module, exports) {
-
-/* eslint no-console: 1 */
-console.warn('You are using the default filter for the fonts service. For more information about event filters see https://docs.feathersjs.com/api/events.html#event-filtering'); // eslint-disable-line no-console
-
-module.exports = function (data, connection, hook) {
-  // eslint-disable-line no-unused-vars
-  return data;
-};
-
-/***/ }),
-/* 61 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Initializes the `files` service on path `/files`
-const createService = __webpack_require__(62);
-const hooks = __webpack_require__(63);
-const filters = __webpack_require__(64);
+const createService = __webpack_require__(57);
+const hooks = __webpack_require__(58);
 /*
 const blobService = require('feathers-blob')
 const fs = require('fs-blob-store')
@@ -1398,7 +1326,7 @@ const path = require('path')
 const filePath = process.env.MBTILES || path.join(__dirname, '../../../../../survey/mbtiles')
 const blobStorage = fs(filePath)
 */
-const multer = __webpack_require__(65);
+const multer = __webpack_require__(59);
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, process.env.MBTILES);
@@ -1408,8 +1336,7 @@ var storage = multer.diskStorage({
   }
 });
 const multipartMiddleware = multer({ storage });
-module.exports = function () {
-  const app = this;
+module.exports = function (app) {
   const paginate = app.get('paginate');
 
   const options = {
@@ -1424,14 +1351,10 @@ module.exports = function () {
   const service = app.service('files');
 
   service.hooks(hooks);
-
-  if (service.filter) {
-    service.filter(filters);
-  }
 };
 
 /***/ }),
-/* 62 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const fs = __webpack_require__(4);
@@ -1509,7 +1432,7 @@ module.exports = function (options) {
 module.exports.Service = Service;
 
 /***/ }),
-/* 63 */
+/* 58 */
 /***/ (function(module, exports) {
 
 // const { authenticate } = require('feathers-authentication').hooks
@@ -1547,58 +1470,40 @@ module.exports = {
 };
 
 /***/ }),
-/* 64 */
-/***/ (function(module, exports) {
-
-/* eslint no-console: 1 */
-console.warn('You are using the default filter for the files service. For more information about event filters see https://docs.feathersjs.com/api/events.html#event-filtering'); // eslint-disable-line no-console
-
-module.exports = function (data, connection, hook) {
-  // eslint-disable-line no-unused-vars
-  return data;
-};
-
-/***/ }),
-/* 65 */
+/* 59 */
 /***/ (function(module, exports) {
 
 module.exports = require("multer");
 
 /***/ }),
-/* 66 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Initializes the `data` service on path `/data`
-const createService = __webpack_require__(2);
-const createModel = __webpack_require__(67);
-const hooks = __webpack_require__(68);
-const filters = __webpack_require__(82);
+const createService = __webpack_require__(1);
+const createModel = __webpack_require__(61);
+const hooks = __webpack_require__(62);
 
-module.exports = function () {
-  const app = this;
+module.exports = function (app) {
   const Model = createModel(app);
   const paginate = app.get('paginate');
 
   const options = {
-    name: 'data',
+    name: 'datasources',
     Model,
     paginate
 
     // Initialize our service with any options it requires
-  };app.use('/data', createService(options));
+  };app.use('/datasources', createService(options));
 
   // Get our initialized service so that we can register hooks and filters
-  const service = app.service('data');
+  const service = app.service('datasources');
 
   service.hooks(hooks);
-
-  if (service.filter) {
-    service.filter(filters);
-  }
 };
 
 /***/ }),
-/* 67 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // See http://docs.sequelizejs.com/en/latest/docs/models-definition/
@@ -1608,7 +1513,7 @@ const DataTypes = Sequelize.DataTypes;
 
 module.exports = function (app) {
   const sequelizeClient = app.get('sequelizeClient');
-  const data = sequelizeClient.define('data', {
+  const datasources = sequelizeClient.define('datasources', {
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
@@ -1617,14 +1522,6 @@ module.exports = function (app) {
     name: {
       type: DataTypes.TEXT,
       allowNull: false
-    },
-    meta: {
-      type: DataTypes.JSONB,
-      allowNull: true
-    },
-    style: {
-      type: DataTypes.JSONB,
-      allowNull: true
     },
     progress: {
       type: DataTypes.FLOAT,
@@ -1639,39 +1536,38 @@ module.exports = function (app) {
     }
   });
 
-  data.associate = function (models) {
+  datasources.associate = function (models) {
     // eslint-disable-line no-unused-vars
-    models.data.belongsTo(models.projects); // generates projectId
-    models.data.belongsTo(models.company); // generates clientId
-    models.data.belongsTo(models.users); // generates userId
-    // models.data.hasMany(models.geometries)
+    models.datasources.belongsTo(models.companies, { onDelete: 'CASCADE' }); // generates companyId
+    models.datasources.belongsTo(models.companies, { as: 'client' }); // generates clientId
+    models.datasources.belongsTo(models.users); // generates userId
   };
 
-  return data;
+  return datasources;
 };
 
 /***/ }),
-/* 68 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const { authenticate } = __webpack_require__(1).hooks;
+const { authenticate } = __webpack_require__(2).hooks;
 // const { discard } = require('feathers-hooks-common')
-const tile = __webpack_require__(69);
-const removeMbtile = __webpack_require__(76);
-const dataBeforeFind = __webpack_require__(77);
-const noReturning = __webpack_require__(78);
-const dataAfterPatch = __webpack_require__(79);
-const dataAfterCreate = __webpack_require__(80);
-const createGeometries = __webpack_require__(81);
+const tile = __webpack_require__(63);
+const removeMbtile = __webpack_require__(70);
+const dataBeforeFind = __webpack_require__(71);
+// const noReturning = require('../../hooks/no-returning')
+const dataAfterPatch = __webpack_require__(72);
+const dataAfterCreate = __webpack_require__(73);
+// const createGeometries = require('../../hooks/create-geometries')
 
 module.exports = {
   before: {
     all: [],
     find: [dataBeforeFind()],
-    get: [],
+    get: [dataBeforeFind()],
     create: [authenticate('jwt')],
     update: [authenticate('jwt')],
-    patch: [authenticate('jwt'), noReturning()],
+    patch: [authenticate('jwt')], //, noReturning()],
     remove: [authenticate('jwt')]
   },
 
@@ -1679,8 +1575,8 @@ module.exports = {
     all: [],
     find: [],
     get: [],
-    create: [tile(), createGeometries(), dataAfterCreate()],
-    update: [tile()],
+    create: [tile(), dataAfterCreate()],
+    update: [tile(), dataAfterCreate()],
     patch: [dataAfterPatch()],
     remove: [removeMbtile()]
   },
@@ -1697,66 +1593,97 @@ module.exports = {
 };
 
 /***/ }),
-/* 69 */
+/* 63 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Use this hook to manipulate incoming or outgoing data.
 // For more information on hooks see: http://docs.feathersjs.com/api/hooks.html
-const Tiler = __webpack_require__(10);
+const fs = __webpack_require__(4);
+const path = __webpack_require__(3);
+const Tiler = __webpack_require__(11);
 module.exports = function (options = {}) {
   // eslint-disable-line no-unused-vars
   return function tile(hook) {
-    const service = hook.app.service('data');
-    if (hook.data.geojson) {
-      const tiler = new Tiler(hook.result.id, hook.data, service);
-      tiler.create();
-      // Hooks can either return nothing or a promise
-      // that resolves with the `hook` object for asynchronous operations
-    } else {
-      service.patch(hook.result.id, { progress: 100 });
-    }
+    const service = hook.app.service('datasources');
+    Promise.resolve().then(() => {
+      if (hook.data.geojson) {
+        return hook.data.geojson;
+      } else if (hook.data.meta && hook.data.meta.tile) {
+        return hook.app.service('db').get(hook.result.id);
+      }
+    }).then(geojson => {
+      if (geojson) {
+        console.log('geojson');
+        fs.unlink(path.join(process.env.MBTILES, hook.id + '.mbtiles'), err => {
+          if (err) {
+            console.log('remove-mbtile', err);
+          }
+
+          hook.data.geojson = geojson;
+          const tiler = new Tiler(hook.result.id, hook.data, service);
+          tiler.create();
+          const geometryService = hook.app.service('geometries');
+          let data = [];
+          hook.data.geojson.features.forEach(feature => {
+            const geometry = Object.assign({}, feature.geometry);
+            geometry.crs = { type: 'name', properties: { name: 'EPSG:4326' } };
+            data.push({ dataId: hook.result.id, properties: feature.properties, geom: geometry });
+          });
+          geometryService.remove(null, {
+            query: {
+              dataId: hook.result.id
+            }
+          }).then(res => {
+            geometryService.create(data);
+          });
+        });
+      } else {
+        console.log('patch');
+        service.patch(hook.result.id, { progress: 100 });
+      }
+    });
     return Promise.resolve(hook);
   };
 };
 
 /***/ }),
-/* 70 */
+/* 64 */
 /***/ (function(module, exports) {
 
 module.exports = require("geojson-vt");
 
 /***/ }),
-/* 71 */
+/* 65 */
 /***/ (function(module, exports) {
 
 module.exports = require("@mapbox/mbtiles");
 
 /***/ }),
-/* 72 */
+/* 66 */
 /***/ (function(module, exports) {
 
 module.exports = require("vt-pbf");
 
 /***/ }),
-/* 73 */
+/* 67 */
 /***/ (function(module, exports) {
 
 module.exports = require("zlib");
 
 /***/ }),
-/* 74 */
+/* 68 */
 /***/ (function(module, exports) {
 
 module.exports = require("@turf/bbox");
 
 /***/ }),
-/* 75 */
+/* 69 */
 /***/ (function(module, exports) {
 
 module.exports = require("@turf/center-of-mass");
 
 /***/ }),
-/* 76 */
+/* 70 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Use this hook to manipulate incoming or outgoing data.
@@ -1778,7 +1705,7 @@ module.exports = function (options = {}) {
 };
 
 /***/ }),
-/* 77 */
+/* 71 */
 /***/ (function(module, exports) {
 
 // Use this hook to manipulate incoming or outgoing data.
@@ -1788,29 +1715,14 @@ module.exports = function (options = {}) {
   // eslint-disable-line no-unused-vars
   return hook => {
     hook.params.sequelize = {
-      include: [{ model: hook.app.services.company.Model, attributes: ['data'] }]
+      include: [{ model: hook.app.services.companies.Model, attributes: ['data'] }]
     };
     return hook;
   };
 };
 
 /***/ }),
-/* 78 */
-/***/ (function(module, exports) {
-
-// Use this hook to manipulate incoming or outgoing data.
-// For more information on hooks see: http://docs.feathersjs.com/api/hooks.html
-
-module.exports = function (options = {}) {
-  // eslint-disable-line no-unused-vars
-  return hook => {
-    hook.params.$returning = false;
-    return Promise.resolve(hook);
-  };
-};
-
-/***/ }),
-/* 79 */
+/* 72 */
 /***/ (function(module, exports) {
 
 // Use this hook to manipulate incoming or outgoing data.
@@ -1820,10 +1732,10 @@ module.exports = function (options = {}) {
   // eslint-disable-line no-unused-vars
   return hook => {
     hook.bypass = true;
-    return hook.app.service('/data').find({
+    return hook.app.service('datasources').find({
       query: {
         id: hook.id,
-        $select: ['id', 'projectId', 'name', 'meta', 'style', 'createdAt', 'progress']
+        $select: ['id', 'projectId', 'name', 'meta', 'style', 'company.data', 'priority', 'createdAt', 'progress']
       }
     }).then(result => {
       hook.result = result[0];
@@ -1833,7 +1745,7 @@ module.exports = function (options = {}) {
 };
 
 /***/ }),
-/* 80 */
+/* 73 */
 /***/ (function(module, exports) {
 
 // Use this hook to manipulate incoming or outgoing data.
@@ -1842,10 +1754,13 @@ module.exports = function (options = {}) {
 module.exports = function (options = {}) {
   // eslint-disable-line no-unused-vars
   return hook => {
-    return hook.app.service('/data').find({
+    return hook.app.service('datasources').find({
       query: {
-        id: hook.result.id,
+        id: hook.result.id
+        /*
+        ,
         $select: ['id', 'projectId', 'name', 'meta', 'style', 'createdAt', 'progress']
+        */
       }
     }).then(result => {
       hook.result = result[0];
@@ -1855,65 +1770,15 @@ module.exports = function (options = {}) {
 };
 
 /***/ }),
-/* 81 */
-/***/ (function(module, exports) {
-
-// Use this hook to manipulate incoming or outgoing data.
-// For more information on hooks see: http://docs.feathersjs.com/api/hooks.html
-
-module.exports = function (options = {}) {
-  // eslint-disable-line no-unused-vars
-  return function tile(hook) {
-    if (hook.data.geojson && hook.data.geojson.features) {
-      const service = hook.app.service('geometries');
-      hook.data.geojson.features.forEach(feature => {
-        /*
-        const properties = Object.assign({}, feature.properties)
-        if (properties.hasOwnProperty('Længde')) {
-          properties['Længde'] = parseFloat(properties['Længde'])
-        }
-        if (properties.hasOwnProperty('Areal')) {
-          properties['Areal'] = parseFloat(properties['Areal'])
-        }
-        if (properties.hasOwnProperty('HalvPerimeter')) {
-          properties['HalvPerimeter'] = parseFloat(properties['HalvPerimeter'])
-        }
-        */
-        const geometry = Object.assign({}, feature.geometry);
-        geometry.crs = { type: 'name', properties: { name: 'EPSG:4326' } };
-        service.create({ dataId: hook.result.id, properties: feature.properties, geom: geometry });
-      });
-    }
-    // Hooks can either return nothing or a promise
-    // that resolves with the `hook` object for asynchronous operations
-    return Promise.resolve(hook);
-  };
-};
-
-/***/ }),
-/* 82 */
-/***/ (function(module, exports) {
-
-/* eslint no-console: 1 */
-console.warn('You are using the default filter for the data service. For more information about event filters see https://docs.feathersjs.com/api/events.html#event-filtering'); // eslint-disable-line no-console
-
-module.exports = function (data, connection, hook) {
-  // eslint-disable-line no-unused-vars
-  return data;
-};
-
-/***/ }),
-/* 83 */
+/* 74 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Initializes the `projects` service on path `/projects`
-const createService = __webpack_require__(2);
-const createModel = __webpack_require__(84);
-const hooks = __webpack_require__(85);
-const filters = __webpack_require__(86);
+const createService = __webpack_require__(1);
+const createModel = __webpack_require__(75);
+const hooks = __webpack_require__(76);
 
-module.exports = function () {
-  const app = this;
+module.exports = function (app) {
   const Model = createModel(app);
   const paginate = app.get('paginate');
 
@@ -1929,14 +1794,10 @@ module.exports = function () {
   const service = app.service('projects');
 
   service.hooks(hooks);
-
-  if (service.filter) {
-    service.filter(filters);
-  }
 };
 
 /***/ }),
-/* 84 */
+/* 75 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // See http://docs.sequelizejs.com/en/latest/docs/models-definition/
@@ -1958,7 +1819,7 @@ module.exports = function (app) {
     },
     public: {
       type: DataTypes.BOOLEAN,
-      allowNull: false
+      defaultValue: false
     }
   }, {
     hooks: {
@@ -1970,25 +1831,29 @@ module.exports = function (app) {
 
   projects.associate = function (models) {
     // eslint-disable-line no-unused-vars
-    models.projects.belongsTo(models.company); // generates companyId
+    models.projects.belongsTo(models.companies, { onDelete: 'CASCADE' }); // generates companyId
+    models.projects.belongsTo(models.users); // generates userId
   };
 
   return projects;
 };
 
 /***/ }),
-/* 85 */
+/* 76 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const { authenticate } = __webpack_require__(1).hooks;
+const { authenticate } = __webpack_require__(2).hooks;
+const { associateCurrentUser } = __webpack_require__(7);
+const projectsBefore = __webpack_require__(77);
+const projectsAfter = __webpack_require__(78);
 module.exports = {
   before: {
     all: [],
-    find: [],
-    get: [],
-    create: [authenticate('jwt')],
-    update: [authenticate('jwt')],
-    patch: [authenticate('jwt')],
+    find: [projectsBefore()],
+    get: [projectsBefore()],
+    create: [authenticate('jwt'), associateCurrentUser({ idField: 'id' })],
+    update: [authenticate('jwt'), associateCurrentUser({ idField: 'id' })],
+    patch: [authenticate('jwt'), associateCurrentUser({ idField: 'id' })],
     remove: [authenticate('jwt')]
   },
 
@@ -1996,9 +1861,9 @@ module.exports = {
     all: [],
     find: [],
     get: [],
-    create: [],
-    update: [],
-    patch: [],
+    create: [projectsAfter()],
+    update: [projectsAfter()],
+    patch: [projectsAfter()],
     remove: []
   },
 
@@ -2014,29 +1879,49 @@ module.exports = {
 };
 
 /***/ }),
-/* 86 */
+/* 77 */
 /***/ (function(module, exports) {
 
-/* eslint no-console: 1 */
-console.warn('You are using the default filter for the projects service. For more information about event filters see https://docs.feathersjs.com/api/events.html#event-filtering'); // eslint-disable-line no-console
+// Use this hook to manipulate incoming or outgoing data.
+// For more information on hooks see: http://docs.feathersjs.com/api/hooks.html
 
-module.exports = function (data, connection, hook) {
+module.exports = function (options = {}) {
   // eslint-disable-line no-unused-vars
-  return data;
+  return context => {
+    context.params.sequelize = {
+      include: [{ model: context.app.services.users.Model, attributes: ['email'] }, { model: context.app.services.companies.Model, attributes: ['name'] }]
+    };
+    return context;
+  };
 };
 
 /***/ }),
-/* 87 */
+/* 78 */
+/***/ (function(module, exports) {
+
+// Use this hook to manipulate incoming or outgoing data.
+// For more information on hooks see: http://docs.feathersjs.com/api/hooks.html
+
+module.exports = function (options = {}) {
+  // eslint-disable-line no-unused-vars
+  return context => {
+    return context.service.get(context.result.id).then(result => {
+      context.result = result;
+      return context;
+    });
+  };
+};
+
+/***/ }),
+/* 79 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Initializes the `geometries` service on path `/geometries`
-const createService = __webpack_require__(2);
-const createModel = __webpack_require__(88);
-const hooks = __webpack_require__(89);
-const filters = __webpack_require__(91);
+const createService = __webpack_require__(1);
+const createModel = __webpack_require__(80);
+const hooks = __webpack_require__(81);
 
-module.exports = function () {
-  const app = this;
+module.exports = function (app) {
   const Model = createModel(app);
   const paginate = app.get('paginate');
 
@@ -2052,14 +1937,10 @@ module.exports = function () {
   const service = app.service('geometries');
 
   service.hooks(hooks);
-
-  if (service.filter) {
-    service.filter(filters);
-  }
 };
 
 /***/ }),
-/* 88 */
+/* 80 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // See http://docs.sequelizejs.com/en/latest/docs/models-definition/
@@ -2093,18 +1974,18 @@ module.exports = function (app) {
 
   geometries.associate = function (models) {
     // eslint-disable-line no-unused-vars
-    models.geometries.belongsTo(models.data, { as: 'data', onDelete: 'CASCADE' });
+    models.geometries.belongsTo(models.datasources, { onDelete: 'CASCADE' });
   };
 
   return geometries;
 };
 
 /***/ }),
-/* 89 */
+/* 81 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
-const geometriesBeforeFind = __webpack_require__(90);
+const geometriesBeforeFind = __webpack_require__(82);
 module.exports = {
   before: {
     all: [],
@@ -2138,7 +2019,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 90 */
+/* 82 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Use this hook to manipulate incoming or outgoing data.
@@ -2157,27 +2038,14 @@ module.exports = function (options = {}) {
 };
 
 /***/ }),
-/* 91 */
-/***/ (function(module, exports) {
-
-/* eslint no-console: 1 */
-console.warn('You are using the default filter for the geometries service. For more information about event filters see https://docs.feathersjs.com/api/events.html#event-filtering'); // eslint-disable-line no-console
-
-module.exports = function (data, connection, hook) {
-  // eslint-disable-line no-unused-vars
-  return data;
-};
-
-/***/ }),
-/* 92 */
+/* 83 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Initializes the `totals` service on path `/totals`
-const createService = __webpack_require__(93);
-const hooks = __webpack_require__(95);
+const createService = __webpack_require__(84);
+const hooks = __webpack_require__(86);
 
-module.exports = function () {
-  const app = this;
+module.exports = function (app) {
   const paginate = app.get('paginate');
 
   const options = {
@@ -2195,11 +2063,11 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 93 */
+/* 84 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* eslint-disable no-unused-vars */
-const { Pool } = __webpack_require__(94);
+const { Pool } = __webpack_require__(85);
 
 class Service {
   constructor(options) {
@@ -2214,7 +2082,7 @@ class Service {
       let sql = `
       select a.id, count(*)::integer as antal, a.st_geometrytype, sum(a.st_length) as st_length, sum(a.st_area) as st_area, sum(a.st_perimeter) as st_perimeter from (
         select
-          properties->>'feature' as id, 
+          COALESCE(properties->>'feature', "dataId"::text) as id, 
           st_geometrytype(geom) as st_geometrytype, 
           st_length(st_transform(geom, 25832)) as st_length, 
           st_area(st_transform(geom, 25832)) as st_area, 
@@ -2282,19 +2150,468 @@ module.exports = function (options) {
 module.exports.Service = Service;
 
 /***/ }),
-/* 94 */
+/* 85 */
 /***/ (function(module, exports) {
 
 module.exports = require("pg");
 
 /***/ }),
-/* 95 */
+/* 86 */
 /***/ (function(module, exports) {
 
 
 module.exports = {
   before: {
     all: [],
+    find: [],
+    get: [],
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
+  },
+
+  after: {
+    all: [],
+    find: [],
+    get: [],
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
+  },
+
+  error: {
+    all: [],
+    find: [],
+    get: [],
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
+  }
+};
+
+/***/ }),
+/* 87 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// Initializes the `db` service on path `/db`
+const createService = __webpack_require__(88);
+const hooks = __webpack_require__(89);
+
+module.exports = function (app) {
+  const paginate = app.get('paginate');
+
+  const options = {
+    name: 'db',
+    paginate
+
+    // Initialize our service with any options it requires
+  };app.use('/db', createService(options));
+
+  // Get our initialized service so that we can register hooks and filters
+  const service = app.service('db');
+
+  service.hooks(hooks);
+};
+
+/***/ }),
+/* 88 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* eslint-disable no-unused-vars */
+// const { Pool } = require('pg')
+const Sequelize = __webpack_require__(0);
+const parse = __webpack_require__(12);
+const reproj = __webpack_require__(13);
+var epsg = __webpack_require__(14);
+class Service {
+  constructor(options) {
+    this.options = options || {};
+  }
+
+  find(params) {
+    return Promise.resolve([]);
+  }
+
+  get(id, params) {
+    // return new Promise((resolve, reject) => {
+    // const pool = new Pool({
+    //  connectionString: params.data.meta.connectionString
+    // })
+    const mssql = params.data.meta.connectionString.indexOf('mssql') === 0;
+    const sequelize = new Sequelize(params.data.meta.connectionString);
+    let sql = `select *, st_asgeojson(st_transform(${params.data.meta.geometryColumn},4326),10) from ${params.data.meta.dbTable}`;
+    if (mssql) {
+      sql = `select *, ${params.data.meta.geometryColumn}.STAsText() as wkt, geom.STSrid as srid from ${params.data.meta.dbTable}`;
+    }
+    return sequelize.query(sql, { type: sequelize.QueryTypes.SELECT }).then(res => {
+      if (mssql) {
+        return {
+          id: id,
+          type: 'FeatureCollection',
+          features: res.map(item => {
+            const properties = Object.assign({}, item);
+            delete properties[params.data.meta.geometryColumn];
+            delete properties.wkt;
+            delete properties.srid;
+            const geojson = parse(item.wkt);
+            return {
+              type: 'Feature',
+              properties,
+              geometry: reproj.toWgs84(geojson, `EPSG:${item.srid}`, epsg)
+            };
+          })
+        };
+      }
+      return {
+        id: id,
+        type: 'FeatureCollection',
+        features: res.map(item => {
+          const properties = Object.assign({}, item);
+          delete properties[params.data.meta.geometryColumn];
+          delete properties.st_asgeojson;
+          return {
+            type: 'Feature',
+            properties,
+            geometry: JSON.parse(item.st_asgeojson)
+          };
+        })
+      };
+    }).catch(err => {
+      console.log(err);
+    });
+    /*
+    pool.query(sql, (err, res) => {
+      if (err) {
+        return reject(err)
+      }
+       const geojson = {
+        id: id,
+        type: 'FeatureCollection',
+        features: res.rows.map(item => {
+          const properties = Object.assign({}, item)
+          delete properties[params.data.meta.geometryColumn]
+          delete properties.st_asgeojson
+          return {
+            type: 'Feature',
+            properties,
+            geometry: JSON.parse(item.st_asgeojson)
+          }
+        })
+      }
+      resolve(geojson)
+    })
+    */
+    // })
+  }
+
+  create(data, params) {
+    if (Array.isArray(data)) {
+      return Promise.all(data.map(current => this.create(current)));
+    }
+
+    return Promise.resolve(data);
+  }
+
+  update(id, data, params) {
+    return Promise.resolve(data);
+  }
+
+  patch(id, data, params) {
+    return Promise.resolve(data);
+  }
+
+  remove(id, params) {
+    return Promise.resolve({ id });
+  }
+}
+
+module.exports = function (options) {
+  return new Service(options);
+};
+
+module.exports.Service = Service;
+
+/***/ }),
+/* 89 */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+const dbBefore = __webpack_require__(15);
+module.exports = {
+  before: {
+    all: [],
+    find: [],
+    get: [dbBefore()],
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
+  },
+
+  after: {
+    all: [],
+    find: [],
+    get: [],
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
+  },
+
+  error: {
+    all: [],
+    find: [],
+    get: [],
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
+  }
+};
+
+/***/ }),
+/* 90 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// Initializes the `extent` service on path `/extent`
+const createService = __webpack_require__(91);
+const hooks = __webpack_require__(92);
+
+module.exports = function (app) {
+  const paginate = app.get('paginate');
+
+  const options = {
+    name: 'extent',
+    paginate
+
+    // Initialize our service with any options it requires
+  };app.use('/extent', createService(options));
+
+  // Get our initialized service so that we can register hooks and filters
+  const service = app.service('extent');
+
+  service.hooks(hooks);
+};
+
+/***/ }),
+/* 91 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* eslint-disable no-unused-vars */
+// const { Pool } = require('pg')
+const Sequelize = __webpack_require__(0);
+const parse = __webpack_require__(12);
+const reproj = __webpack_require__(13);
+var epsg = __webpack_require__(14);
+
+class Service {
+  constructor(options) {
+    this.options = options || {};
+  }
+
+  find(params) {
+    return Promise.resolve([]);
+  }
+
+  get(id, params) {
+    // return new Promise((resolve, reject) => {
+    /*
+    const pool = new Pool({
+        connectionString: params.data.meta.connectionString
+      }) */
+    const mssql = params.data.meta.connectionString.indexOf('mssql') === 0;
+    const sequelize = new Sequelize(params.data.meta.connectionString);
+    let sql = `select st_asgeojson(st_extent(st_transform(${params.data.meta.geometryColumn},4326)),10) from ${params.data.meta.dbTable}`;
+    if (mssql) {
+      sql = `select a.geom.STAsText() as wkt, a.geom.STSrid as srid from (select GEOMETRY::EnvelopeAggregate(${params.data.meta.geometryColumn}) as geom from ${params.data.meta.dbTable}) as a`;
+    }
+    return sequelize.query(sql, { type: sequelize.QueryTypes.SELECT }).then(res => {
+      if (res.length > 0) {
+        const item = res[0];
+        if (mssql) {
+          const geojson = parse(item.wkt);
+          return {
+            id: id,
+            type: 'Feature',
+            properties: {},
+            geometry: reproj.toWgs84(geojson, `EPSG:${item.srid}`, epsg)
+          };
+        }
+        return {
+          id: id,
+          type: 'Feature',
+          properties: {},
+          geometry: JSON.parse(item.st_asgeojson)
+        };
+      }
+    });
+    /*
+    pool.query(sql, (err, res) => {
+      if (err) {
+        return reject(err)
+      }
+      const geojson = {
+        id: id,
+        type: 'Feature',
+        properties: {},
+        geometry: JSON.parse(res.rows[0].st_asgeojson)
+      }
+      resolve(geojson)
+    })
+    */
+    // })
+  }
+
+  create(data, params) {
+    if (Array.isArray(data)) {
+      return Promise.all(data.map(current => this.create(current)));
+    }
+
+    return Promise.resolve(data);
+  }
+
+  update(id, data, params) {
+    return Promise.resolve(data);
+  }
+
+  patch(id, data, params) {
+    return Promise.resolve(data);
+  }
+
+  remove(id, params) {
+    return Promise.resolve({ id });
+  }
+}
+
+module.exports = function (options) {
+  return new Service(options);
+};
+
+module.exports.Service = Service;
+
+/***/ }),
+/* 92 */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+const dbBefore = __webpack_require__(15);
+module.exports = {
+  before: {
+    all: [],
+    find: [],
+    get: [dbBefore()],
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
+  },
+
+  after: {
+    all: [],
+    find: [],
+    get: [],
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
+  },
+
+  error: {
+    all: [],
+    find: [],
+    get: [],
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
+  }
+};
+
+/***/ }),
+/* 93 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// Initializes the `styles` service on path `/styles`
+const createService = __webpack_require__(1);
+const createModel = __webpack_require__(94);
+const hooks = __webpack_require__(95);
+
+module.exports = function (app) {
+  const Model = createModel(app);
+  const paginate = app.get('paginate');
+
+  const options = {
+    name: 'styles',
+    Model,
+    paginate
+
+    // Initialize our service with any options it requires
+  };app.use('/styles', createService(options));
+
+  // Get our initialized service so that we can register hooks and filters
+  const service = app.service('styles');
+
+  service.hooks(hooks);
+};
+
+/***/ }),
+/* 94 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// See http://docs.sequelizejs.com/en/latest/docs/models-definition/
+// for more of what you can do here.
+const Sequelize = __webpack_require__(0);
+const DataTypes = Sequelize.DataTypes;
+
+module.exports = function (app) {
+  const sequelizeClient = app.get('sequelizeClient');
+  const styles = sequelizeClient.define('styles', {
+    id: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+      defaultValue: DataTypes.UUIDV4
+    },
+    name: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    data: {
+      type: DataTypes.JSONB,
+      allowNull: true
+    },
+    global: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    }
+  }, {
+    hooks: {
+      beforeCount(options) {
+        options.raw = true;
+      }
+    }
+  });
+
+  styles.associate = function (models) {
+    // eslint-disable-line no-unused-vars
+    models.styles.belongsTo(models.companies, { onDelete: 'CASCADE' }); // generates companyId
+    models.styles.belongsTo(models.users); // generates userId
+  };
+
+  return styles;
+};
+
+/***/ }),
+/* 95 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const { authenticate } = __webpack_require__(2).hooks;
+
+module.exports = {
+  before: {
+    all: [authenticate('jwt')],
     find: [],
     get: [],
     create: [],
@@ -2328,12 +2645,355 @@ module.exports = {
 /* 96 */
 /***/ (function(module, exports, __webpack_require__) {
 
-// Application hooks that run for every service
-const logger = __webpack_require__(97);
+// Initializes the `projects-styles` service on path `/projects-styles`
+const createService = __webpack_require__(1);
+const createModel = __webpack_require__(97);
+const hooks = __webpack_require__(98);
+
+module.exports = function (app) {
+  const Model = createModel(app);
+  const paginate = app.get('paginate');
+
+  const options = {
+    name: 'projects-styles',
+    Model,
+    paginate
+
+    // Initialize our service with any options it requires
+  };app.use('/projects-styles', createService(options));
+
+  // Get our initialized service so that we can register hooks and filters
+  const service = app.service('projects-styles');
+
+  service.hooks(hooks);
+};
+
+/***/ }),
+/* 97 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// See http://docs.sequelizejs.com/en/latest/docs/models-definition/
+// for more of what you can do here.
+const Sequelize = __webpack_require__(0);
+const DataTypes = Sequelize.DataTypes;
+
+module.exports = function (app) {
+  const sequelizeClient = app.get('sequelizeClient');
+  const projectsStyles = sequelizeClient.define('projects_styles', {
+    id: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+      defaultValue: DataTypes.UUIDV4
+    },
+    name: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    priority: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    }
+  }, {
+    hooks: {
+      beforeCount(options) {
+        options.raw = true;
+      }
+    }
+  });
+
+  projectsStyles.associate = function (models) {
+    // eslint-disable-line no-unused-vars
+    models.projects_styles.belongsTo(models.projects, { onDelete: 'CASCADE' }); // generates projectId
+    models.projects_styles.belongsTo(models.styles, { onDelete: 'CASCADE' }); // generates styleId
+  };
+
+  return projectsStyles;
+};
+
+/***/ }),
+/* 98 */
+/***/ (function(module, exports) {
+
 
 module.exports = {
   before: {
     all: [],
+    find: [],
+    get: [],
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
+  },
+
+  after: {
+    all: [],
+    find: [],
+    get: [],
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
+  },
+
+  error: {
+    all: [],
+    find: [],
+    get: [],
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
+  }
+};
+
+/***/ }),
+/* 99 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// Initializes the `projectcompany` service on path `/projectcompany`
+const createService = __webpack_require__(1);
+const createModel = __webpack_require__(100);
+const hooks = __webpack_require__(101);
+
+module.exports = function (app) {
+  const Model = createModel(app);
+  const paginate = app.get('paginate');
+
+  const options = {
+    name: 'projects-companies',
+    Model,
+    paginate
+
+    // Initialize our service with any options it requires
+  };app.use('/projects-companies', createService(options));
+
+  // Get our initialized service so that we can register hooks and filters
+  const service = app.service('projects-companies');
+
+  service.hooks(hooks);
+};
+
+/***/ }),
+/* 100 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// See http://docs.sequelizejs.com/en/latest/docs/models-definition/
+// for more of what you can do here.
+const Sequelize = __webpack_require__(0);
+const DataTypes = Sequelize.DataTypes;
+
+module.exports = function (app) {
+  const sequelizeClient = app.get('sequelizeClient');
+  const projectsCompanies = sequelizeClient.define('projects_companies', {
+    id: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+      defaultValue: DataTypes.UUIDV4
+    }
+  }, {
+    hooks: {
+      beforeCount(options) {
+        options.raw = true;
+      }
+    }
+  });
+
+  projectsCompanies.associate = function (models) {
+    // eslint-disable-line no-unused-vars
+    // Define associations here
+    // See http://docs.sequelizejs.com/en/latest/docs/associations/
+    models.projects_companies.belongsTo(models.companies, { onDelete: 'CASCADE' }); // generates companyId
+    models.projects_companies.belongsTo(models.projects, { onDelete: 'CASCADE' }); // generates projectId
+  };
+
+  return projectsCompanies;
+};
+
+/***/ }),
+/* 101 */
+/***/ (function(module, exports) {
+
+
+module.exports = {
+  before: {
+    all: [],
+    find: [],
+    get: [],
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
+  },
+
+  after: {
+    all: [],
+    find: [],
+    get: [],
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
+  },
+
+  error: {
+    all: [],
+    find: [],
+    get: [],
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
+  }
+};
+
+/***/ }),
+/* 102 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// Initializes the `clients` service on path `/clients`
+const createService = __webpack_require__(1);
+const createModel = __webpack_require__(103);
+const hooks = __webpack_require__(104);
+
+module.exports = function (app) {
+  const Model = createModel(app);
+  const paginate = app.get('paginate');
+
+  const options = {
+    name: 'clients',
+    Model,
+    paginate
+
+    // Initialize our service with any options it requires
+  };app.use('/clients', createService(options));
+
+  // Get our initialized service so that we can register hooks and filters
+  const service = app.service('clients');
+
+  service.hooks(hooks);
+};
+
+/***/ }),
+/* 103 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// See http://docs.sequelizejs.com/en/latest/docs/models-definition/
+// for more of what you can do here.
+const Sequelize = __webpack_require__(0);
+const DataTypes = Sequelize.DataTypes;
+
+module.exports = function (app) {
+  const sequelizeClient = app.get('sequelizeClient');
+  const clients = sequelizeClient.define('clients', {
+    id: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+      defaultValue: DataTypes.UUIDV4
+    }
+  }, {
+    hooks: {
+      beforeCount(options) {
+        options.raw = true;
+      }
+    }
+  });
+
+  clients.associate = function (models) {
+    // eslint-disable-line no-unused-vars
+    // Define associations here
+    // See http://docs.sequelizejs.com/en/latest/docs/associations/
+    models.clients.belongsTo(models.projects, { onDelete: 'CASCADE' }); // generates projectId
+    models.clients.belongsTo(models.companies, { onDelete: 'CASCADE' }); // generates companyId
+    models.clients.belongsTo(models.users); // generates userId
+  };
+
+  return clients;
+};
+
+/***/ }),
+/* 104 */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+const clientsBefore = __webpack_require__(105);
+const clientsAfter = __webpack_require__(106);
+module.exports = {
+  before: {
+    all: [],
+    find: [clientsBefore()],
+    get: [clientsBefore()],
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
+  },
+
+  after: {
+    all: [],
+    find: [],
+    get: [],
+    create: [clientsAfter()],
+    update: [clientsAfter()],
+    patch: [clientsAfter()],
+    remove: []
+  },
+
+  error: {
+    all: [],
+    find: [],
+    get: [],
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
+  }
+};
+
+/***/ }),
+/* 105 */
+/***/ (function(module, exports) {
+
+// Use this hook to manipulate incoming or outgoing data.
+// For more information on hooks see: http://docs.feathersjs.com/api/hooks.html
+
+module.exports = function (options = {}) {
+  // eslint-disable-line no-unused-vars
+  return context => {
+    context.params.sequelize = {
+      include: [{ model: context.app.services.users.Model, attributes: ['email'] }, { model: context.app.services.companies.Model, attributes: ['name'] }]
+    };
+    return context;
+  };
+};
+
+/***/ }),
+/* 106 */
+/***/ (function(module, exports) {
+
+// Use this hook to manipulate incoming or outgoing data.
+// For more information on hooks see: http://docs.feathersjs.com/api/hooks.html
+
+module.exports = function (options = {}) {
+  // eslint-disable-line no-unused-vars
+  return context => {
+    return context.service.get(context.result.id).then(result => {
+      context.result = result;
+      return context;
+    });
+  };
+};
+
+/***/ }),
+/* 107 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// Application hooks that run for every service
+const logger = __webpack_require__(108);
+
+module.exports = {
+  before: {
+    all: [logger()],
     find: [],
     get: [],
     create: [],
@@ -2364,46 +3024,107 @@ module.exports = {
 };
 
 /***/ }),
-/* 97 */
+/* 108 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // A hook that logs service method before, after and error
+// See https://github.com/winstonjs/winston for documentation
+// about the logger.
 const logger = __webpack_require__(5);
 
+// To see more detailed messages, uncomment the following line
+// logger.level = 'debug';
+
 module.exports = function () {
-  return function (hook) {
-    let message = `${hook.type}: ${hook.path} - Method: ${hook.method}`;
+  return context => {
+    // This debugs the service call and a stringified version of the hook context
+    // You can customize the mssage (and logger) to your needs
+    logger.debug(`${context.type} app.service('${context.path}').${context.method}()`);
 
-    if (hook.type === 'error') {
-      message += `: ${hook.error.message}`;
+    if (typeof context.toJSON === 'function') {
+      logger.debug('Hook Context', JSON.stringify(context, null, '  '));
     }
 
-    logger.info(message);
-    logger.debug('hook.data', hook.data);
-    logger.debug('hook.params', hook.params);
-
-    if (hook.result) {
-      logger.debug('hook.result', hook.result);
-    }
-
-    if (hook.error) {
-      logger.error(hook.error);
+    if (context.error) {
+      logger.error(context.error);
     }
   };
 };
 
 /***/ }),
-/* 98 */
+/* 109 */
+/***/ (function(module, exports) {
+
+module.exports = function (app) {
+  if (typeof app.channel !== 'function') {
+    // If no real-time functionality has been configured just return
+    return;
+  }
+
+  app.on('connection', connection => {
+    // On a new real-time connection, add it to the anonymous channel
+    app.channel('anonymous').join(connection);
+  });
+
+  app.on('login', (authResult, { connection }) => {
+    // connection can be undefined if there is no
+    // real-time connection, e.g. when logging in via REST
+    if (connection) {
+      // Obtain the logged in user from the connection
+      // const user = connection.user;
+
+      // The connection is no longer anonymous, remove it
+      app.channel('anonymous').leave(connection);
+
+      // Add it to the authenticated user channel
+      app.channel('authenticated').join(connection);
+
+      // Channels can be named anything and joined on any condition
+
+      // E.g. to send real-time events only to admins use
+      // if(user.isAdmin) { app.channel('admins').join(connection); }
+
+      // If the user has joined e.g. chat rooms
+      // if(Array.isArray(user.rooms)) user.rooms.forEach(room => app.channel(`rooms/${room.id}`).join(channel));
+
+      // Easily organize users by email and userid for things like messaging
+      // app.channel(`emails/${user.email}`).join(channel);
+      // app.channel(`userIds/$(user.id}`).join(channel);
+    }
+  });
+
+  app.publish((data, hook) => {// eslint-disable-line no-unused-vars
+    // Here you can add event publishers to channels set up in `channels.js`
+    // To publish only for a specific event use `app.publish(eventname, () => {})`
+
+    // e.g. to publish all service events to all authenticated users use
+    // return app.channel('authenticated');
+  });
+
+  // Here you can also add service specific event publishers
+  // e..g the publish the `users` service `created` event to the `admins` channel
+  // app.service('users').publish('created', () => app.channel('admins'));
+
+  // With the userid and email organization from above you can easily select involved users
+  // app.service('messages').publish(() => {
+  //   return [
+  //     app.channel(`userIds/${data.createdBy}`),
+  //     app.channel(`emails/${data.recipientEmail}`)
+  //   ];
+  // });
+};
+
+/***/ }),
+/* 110 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const authentication = __webpack_require__(1);
-const jwt = __webpack_require__(99);
-const local = __webpack_require__(7);
-const authManagement = __webpack_require__(8);
-const notifier = __webpack_require__(9);
+const authentication = __webpack_require__(2);
+const jwt = __webpack_require__(111);
+const local = __webpack_require__(8);
+const authManagement = __webpack_require__(9);
+const notifier = __webpack_require__(10);
 
-module.exports = function () {
-  const app = this;
+module.exports = function (app) {
   const config = app.get('authentication');
 
   // Set up authentication with the secret
@@ -2423,23 +3144,22 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 99 */
+/* 111 */
 /***/ (function(module, exports) {
 
-module.exports = require("feathers-authentication-jwt");
+module.exports = require("@feathersjs/authentication-jwt");
 
 /***/ }),
-/* 100 */
+/* 112 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Sequelize = __webpack_require__(0);
-const seed = __webpack_require__(101);
-module.exports = function () {
-  const app = this;
+const seed = __webpack_require__(113);
+module.exports = function (app) {
   const connectionString = app.get('postgres');
   const sequelize = new Sequelize(connectionString, {
     dialect: 'postgres',
-    logging: false,
+    logging: true,
     define: {
       freezeTableName: true
     }
@@ -2469,22 +3189,21 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 101 */
+/* 113 */
 /***/ (function(module, exports, __webpack_require__) {
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
-const rolesData = __webpack_require__(102);
-const usersData = __webpack_require__(103);
-const companyData = __webpack_require__(104);
-const Tiler = __webpack_require__(10);
+const rolesData = __webpack_require__(114);
+const usersData = __webpack_require__(115);
+const companiesData = __webpack_require__(116);
+const Tiler = __webpack_require__(11);
 
-module.exports = function () {
-  const app = this;
+module.exports = function (app) {
   const ifEmptyCreate2 = ifEmptyCreate.bind(this);
   app.configure(ifEmptyCreate2('roles', rolesData));
   app.configure(ifEmptyCreate2('users', usersData));
-  app.configure(ifEmptyCreate2('company', companyData));
+  app.configure(ifEmptyCreate2('companies', companiesData));
   app.configure(tile);
 };
 
@@ -2518,7 +3237,7 @@ function ifEmptyCreate(name, data) {
 }
 
 function tile() {
-  const service = this.service('data');
+  const service = this.service('datasources');
   return service.find({
     query: {
       progress: {
@@ -2538,29 +3257,28 @@ function tile() {
 }
 
 /***/ }),
-/* 102 */
+/* 114 */
 /***/ (function(module, exports) {
 
 const system = {
-  role: 'system'
+  name: 'system'
 };
 
 const admin = {
-  role: 'admin'
+  name: 'admin'
 };
 
 const basic = {
-  role: 'basic'
+  name: 'basic'
 };
 
 module.exports = [system, admin, basic];
 
 /***/ }),
-/* 103 */
+/* 115 */
 /***/ (function(module, exports) {
 
 const system = {
-  role: 'system',
   email: 'rut@le34.dk',
   password: process.env.PASSWORD || 'admin',
   isVerified: true,
@@ -2570,7 +3288,7 @@ const system = {
 module.exports = [system];
 
 /***/ }),
-/* 104 */
+/* 116 */
 /***/ (function(module, exports) {
 
 const clients = [{
@@ -2684,12 +3402,8 @@ const clients = [{
 module.exports = clients.map(client => {
   return {
     id: client.id,
-    data: {
-      name: client.name,
-      cvrno: client.cvrno,
-      type: client.type,
-      clients: client.clients
-    }
+    name: client.name,
+    cvr: client.cvrno
   };
 });
 

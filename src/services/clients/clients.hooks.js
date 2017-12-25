@@ -1,10 +1,11 @@
-const { authenticate } = require('feathers-authentication').hooks
 
+const clientsBefore = require('../../hooks/clients-before')
+const clientsAfter = require('../../hooks/clients-after')
 module.exports = {
   before: {
-    all: [ authenticate('jwt') ],
-    find: [],
-    get: [],
+    all: [],
+    find: [clientsBefore()],
+    get: [clientsBefore()],
     create: [],
     update: [],
     patch: [],
@@ -15,9 +16,9 @@ module.exports = {
     all: [],
     find: [],
     get: [],
-    create: [],
-    update: [],
-    patch: [],
+    create: [clientsAfter()],
+    update: [clientsAfter()],
+    patch: [clientsAfter()],
     remove: []
   },
 

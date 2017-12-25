@@ -1,13 +1,13 @@
 const system = {
-  role: 'system'
+  name: 'system'
 }
 
 const admin = {
-  role: 'admin'
+  name: 'admin'
 }
 
 const basic = {
-  role: 'basic'
+  name: 'basic'
 }
 
 module.exports = [system, admin, basic]

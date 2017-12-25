@@ -2,10 +2,8 @@
 const createService = require('feathers-elasticsearch')
 const createModel = require('../../models/cvr.model')
 const hooks = require('./cvr.hooks')
-const filters = require('./cvr.filters')
 
-module.exports = function () {
-  const app = this
+module.exports = function (app) {
   const Model = createModel(app)
   const paginate = app.get('paginate')
   const elasticsearch = {
@@ -26,8 +24,4 @@ module.exports = function () {
   const service = app.service('cvr')
 
   service.hooks(hooks)
-
-  if (service.filter) {
-    service.filter(filters)
-  }
 }

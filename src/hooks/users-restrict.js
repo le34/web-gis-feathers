@@ -1,6 +1,6 @@
 // Use this hook to manipulate incoming or outgoing data.
 // For more information on hooks see: http://docs.feathersjs.com/api/hooks.html
-const errors = require('feathers-errors')
+const errors = require('@feathersjs/errors')
 module.exports = function (options = {}) { // eslint-disable-line no-unused-vars
   return function usersRestrict (hook) {
     if (!hook.params.user) {

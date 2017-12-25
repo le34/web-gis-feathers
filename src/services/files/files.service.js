@@ -1,7 +1,6 @@
 // Initializes the `files` service on path `/files`
 const createService = require('./files.class.js')
 const hooks = require('./files.hooks')
-const filters = require('./files.filters')
 /*
 const blobService = require('feathers-blob')
 const fs = require('fs-blob-store')
@@ -19,8 +18,7 @@ var storage = multer.diskStorage({
   }
 })
 const multipartMiddleware = multer({storage})
-module.exports = function () {
-  const app = this
+module.exports = function (app) {
   const paginate = app.get('paginate')
 
   const options = {
@@ -36,8 +34,4 @@ module.exports = function () {
   const service = app.service('files')
 
   service.hooks(hooks)
-
-  if (service.filter) {
-    service.filter(filters)
-  }
 }

@@ -1,32 +1,38 @@
 const users = require('./users/users.service.js')
 const roles = require('./roles/roles.service.js')
 const email = require('./email/email.service.js')
-const company = require('./company/company.service.js')
+const companies = require('./companies/companies.service.js')
 const cvr = require('./cvr/cvr.service.js')
-
 const fonts = require('./fonts/fonts.service.js')
-
 const files = require('./files/files.service.js')
-
-const data = require('./data/data.service.js')
-
+const datasources = require('./datasources/datasources.service.js')
 const projects = require('./projects/projects.service.js')
-
 const geometries = require('./geometries/geometries.service.js')
-
 const totals = require('./totals/totals.service.js')
+const db = require('./db/db.service.js')
+const extent = require('./extent/extent.service.js')
+const styles = require('./styles/styles.service.js')
+const projectsStyles = require('./projects-styles/projects-styles.service.js')
+const projectsCompanies = require('./projects-companies/projects-companies.service.js')
 
-module.exports = function () {
-  const app = this // eslint-disable-line no-unused-vars
+const clients = require('./clients/clients.service.js')
+
+module.exports = function (app) {
   app.configure(users)
   app.configure(roles)
   app.configure(email)
-  app.configure(company)
+  app.configure(companies)
   app.configure(cvr)
   app.configure(fonts)
   app.configure(files)
-  app.configure(data)
+  app.configure(datasources)
   app.configure(projects)
   app.configure(geometries)
   app.configure(totals)
+  app.configure(db)
+  app.configure(extent)
+  app.configure(styles)
+  app.configure(projectsStyles)
+  app.configure(projectsCompanies)
+  app.configure(clients)
 }

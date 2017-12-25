@@ -64,13 +64,14 @@ Tiler.prototype.putTile = function () {
       var tile = this._tileIndex.getTile(item.z, item.x, item.y)
       var layers = {}
       tile.features.forEach((feature) => {
-        if (this._features.indexOf(feature.tags.feature) === -1) {
-          this._features.push(feature.tags.feature)
+        let layername = feature.tags.feature || this._id
+        if (this._features.indexOf(layername) === -1) {
+          this._features.push(layername)
         }
-        if (!layers.hasOwnProperty(feature.tags.feature)) {
-          layers[feature.tags.feature] = []
+        if (!layers.hasOwnProperty(layername)) {
+          layers[layername] = []
         }
-        layers[feature.tags.feature].push(feature)
+        layers[layername].push(feature)
       })
       var layers2 = {}
       Object.keys(layers).forEach((key) => {

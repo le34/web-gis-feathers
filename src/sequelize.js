@@ -1,11 +1,10 @@
 const Sequelize = require('sequelize')
 const seed = require('./seed')
-module.exports = function () {
-  const app = this
+module.exports = function (app) {
   const connectionString = app.get('postgres')
   const sequelize = new Sequelize(connectionString, {
     dialect: 'postgres',
-    logging: false,
+    logging: true,
     define: {
       freezeTableName: true
     }

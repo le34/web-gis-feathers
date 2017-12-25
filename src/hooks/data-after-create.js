@@ -3,10 +3,13 @@
 
 module.exports = function (options = {}) { // eslint-disable-line no-unused-vars
   return (hook) => {
-    return hook.app.service('/data').find({
+    return hook.app.service('datasources').find({
       query: {
-        id: hook.result.id,
+        id: hook.result.id
+        /*
+        ,
         $select: ['id', 'projectId', 'name', 'meta', 'style', 'createdAt', 'progress']
+        */
       }
     }).then(result => {
       hook.result = result[0]

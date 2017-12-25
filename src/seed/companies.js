@@ -129,11 +129,7 @@ const clients = [
 module.exports = clients.map(client => {
   return {
     id: client.id,
-    data: {
-      name: client.name,
-      cvrno: client.cvrno,
-      type: client.type,
-      clients: client.clients
-    }
+    name: client.name,
+    cvr: client.cvrno
   }
 })

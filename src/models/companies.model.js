@@ -5,14 +5,18 @@ const DataTypes = Sequelize.DataTypes
 
 module.exports = function (app) {
   const sequelizeClient = app.get('sequelizeClient')
-  const company = sequelizeClient.define('company', {
+  const companies = sequelizeClient.define('companies', {
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4
     },
-    data: {
-      type: DataTypes.JSONB,
+    name: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    cvr: {
+      type: DataTypes.TEXT,
       allowNull: false
     }
   }, {
@@ -23,10 +27,10 @@ module.exports = function (app) {
     }
   })
 
-  company.associate = function (models) { // eslint-disable-line no-unused-vars
+  companies.associate = function (models) { // eslint-disable-line no-unused-vars
     // Define associations here
     // See http://docs.sequelizejs.com/en/latest/docs/associations/
   }
 
-  return company
+  return companies
 }

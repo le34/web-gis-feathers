@@ -1,10 +1,8 @@
 // Initializes the `fonts` service on path `/fonts`
 const createService = require('./fonts.class.js')
 const hooks = require('./fonts.hooks')
-const filters = require('./fonts.filters')
 
-module.exports = function () {
-  const app = this
+module.exports = function (app) {
   const paginate = app.get('paginate')
 
   const options = {
@@ -19,8 +17,4 @@ module.exports = function () {
   const service = app.service('fonts')
 
   service.hooks(hooks)
-
-  if (service.filter) {
-    service.filter(filters)
-  }
 }

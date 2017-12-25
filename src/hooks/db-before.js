@@ -2,10 +2,10 @@
 // For more information on hooks see: http://docs.feathersjs.com/api/hooks.html
 
 module.exports = function (options = {}) { // eslint-disable-line no-unused-vars
-  return function userClient (hook) {
-    hook.params.sequelize = {
-      include: [ { model: hook.app.services.company.Model } ]
-    }
-    return Promise.resolve(hook)
+  return hook => {
+    return hook.app.service('datasources').get(hook.id).then(result => {
+      hook.params.data = result
+      return Promise.resolve(hook)
+    })
   }
 }

@@ -5,7 +5,7 @@ const DataTypes = Sequelize.DataTypes
 
 module.exports = function (app) {
   const sequelizeClient = app.get('sequelizeClient')
-  const data = sequelizeClient.define('data', {
+  const datasources = sequelizeClient.define('datasources', {
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
@@ -14,14 +14,6 @@ module.exports = function (app) {
     name: {
       type: DataTypes.TEXT,
       allowNull: false
-    },
-    meta: {
-      type: DataTypes.JSONB,
-      allowNull: true
-    },
-    style: {
-      type: DataTypes.JSONB,
-      allowNull: true
     },
     progress: {
       type: DataTypes.FLOAT,
@@ -36,12 +28,11 @@ module.exports = function (app) {
     }
   })
 
-  data.associate = function (models) { // eslint-disable-line no-unused-vars
-    models.data.belongsTo(models.projects) // generates projectId
-    models.data.belongsTo(models.company) // generates clientId
-    models.data.belongsTo(models.users) // generates userId
-    // models.data.hasMany(models.geometries)
+  datasources.associate = function (models) { // eslint-disable-line no-unused-vars
+    models.datasources.belongsTo(models.companies, { onDelete: 'CASCADE' }) // generates companyId
+    models.datasources.belongsTo(models.companies, { as: 'client' }) // generates clientId
+    models.datasources.belongsTo(models.users) // generates userId
   }
 
-  return data
+  return datasources
 }

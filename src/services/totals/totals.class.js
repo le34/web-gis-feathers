@@ -14,7 +14,7 @@ class Service {
       let sql = `
       select a.id, count(*)::integer as antal, a.st_geometrytype, sum(a.st_length) as st_length, sum(a.st_area) as st_area, sum(a.st_perimeter) as st_perimeter from (
         select
-          properties->>'feature' as id, 
+          COALESCE(properties->>'feature', "dataId"::text) as id, 
           st_geometrytype(geom) as st_geometrytype, 
           st_length(st_transform(geom, 25832)) as st_length, 
           st_area(st_transform(geom, 25832)) as st_area, 

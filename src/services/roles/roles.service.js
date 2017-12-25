@@ -2,10 +2,8 @@
 const createService = require('feathers-sequelize')
 const createModel = require('../../models/roles.model')
 const hooks = require('./roles.hooks')
-const filters = require('./roles.filters')
 
-module.exports = function () {
-  const app = this
+module.exports = function (app) {
   const Model = createModel(app)
   const paginate = app.get('paginate')
 
@@ -22,8 +20,4 @@ module.exports = function () {
   const service = app.service('roles')
 
   service.hooks(hooks)
-
-  if (service.filter) {
-    service.filter(filters)
-  }
 }

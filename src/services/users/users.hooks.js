@@ -1,7 +1,7 @@
-const { authenticate } = require('feathers-authentication').hooks
+const { authenticate } = require('@feathersjs/authentication').hooks
 const commonHooks = require('feathers-hooks-common')
 const { restrictToOwner } = require('feathers-authentication-hooks')
-const { hashPassword } = require('feathers-authentication-local').hooks
+const { hashPassword } = require('@feathersjs/authentication-local').hooks
 const verifyHooks = require('feathers-authentication-management').hooks
 const restrict = [
   authenticate('jwt'),
@@ -13,7 +13,7 @@ const restrict = [
 
 const sendVerificationEmail = require('../../hooks/send-verification-email')
 
-const userClient = require('../../hooks/user-client')
+const userBefore = require('../../hooks/user-before')
 
 const userClientAfter = require('../../hooks/user-client-after')
 
@@ -22,8 +22,8 @@ const usersRestrict = require('../../hooks/users-restrict')
 module.exports = {
   before: {
     all: [],
-    find: [authenticate('jwt'), userClient()],
-    get: [...restrict],
+    find: [authenticate('jwt'), userBefore()],
+    get: [authenticate('jwt'), userBefore()],
     create: [hashPassword(), verifyHooks.addVerification()],
     update: [commonHooks.disallow('external')],
     patch: [

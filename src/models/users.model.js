@@ -25,11 +25,6 @@ module.exports = function (app) {
       type: DataTypes.BOOLEAN,
       defaultValue: true
     },
-    role: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      defaultValue: 'basic'
-    },
     isVerified: { type: DataTypes.BOOLEAN },
     verifyToken: { type: DataTypes.STRING },
     verifyShortToken: { type: DataTypes.STRING },
@@ -49,7 +44,8 @@ module.exports = function (app) {
   users.associate = function (models) { // eslint-disable-line no-unused-vars
     // Define associations here
     // See http://docs.sequelizejs.com/en/latest/docs/associations/
-    models.users.belongsTo(models.company)
+    models.users.belongsTo(models.companies)
+    models.users.belongsTo(models.roles)
   }
 
   return users

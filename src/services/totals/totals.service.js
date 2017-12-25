@@ -2,8 +2,7 @@
 const createService = require('./totals.class.js')
 const hooks = require('./totals.hooks')
 
-module.exports = function () {
-  const app = this
+module.exports = function (app) {
   const paginate = app.get('paginate')
 
   const options = {
