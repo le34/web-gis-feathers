@@ -12,10 +12,19 @@ const totals = require('./totals/totals.service.js')
 const db = require('./db/db.service.js')
 const extent = require('./extent/extent.service.js')
 const styles = require('./styles/styles.service.js')
-const projectsStyles = require('./projects-styles/projects-styles.service.js')
-const projectsCompanies = require('./projects-companies/projects-companies.service.js')
-
+const layers = require('./layers/layers.service.js')
+// const layerstyles = require('./layerstyles/layerstyles.service.js')
 const clients = require('./clients/clients.service.js')
+
+const datasourcetypes = require('./datasourcetypes/datasourcetypes.service.js')
+
+const tiles = require('./tiles/tiles.service.js')
+
+const tools = require('./tools/tools.service.js')
+
+const projectsTools = require('./projects-tools/projects-tools.service.js')
+
+const logos = require('./logos/logos.service.js')
 
 module.exports = function (app) {
   app.configure(users)
@@ -32,7 +41,12 @@ module.exports = function (app) {
   app.configure(db)
   app.configure(extent)
   app.configure(styles)
-  app.configure(projectsStyles)
-  app.configure(projectsCompanies)
+  app.configure(layers)
+  // app.configure(layerstyles)
   app.configure(clients)
+  app.configure(datasourcetypes)
+  app.configure(tiles)
+  app.configure(tools)
+  app.configure(projectsTools)
+  app.configure(logos)
 }

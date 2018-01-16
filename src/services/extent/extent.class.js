@@ -15,16 +15,11 @@ class Service {
   }
 
   get (id, params) {
-    // return new Promise((resolve, reject) => {
-    /*
-    const pool = new Pool({
-        connectionString: params.data.meta.connectionString
-      }) */
-    const mssql = params.data.meta.connectionString.indexOf('mssql') === 0
-    const sequelize = new Sequelize(params.data.meta.connectionString)
-    let sql = `select st_asgeojson(st_extent(st_transform(${params.data.meta.geometryColumn},4326)),10) from ${params.data.meta.dbTable}`
+    const mssql = params.data.data.connectionString.indexOf('mssql') === 0
+    const sequelize = new Sequelize(params.data.data.connectionString)
+    let sql = `select st_asgeojson(st_extent(st_transform(${params.data.meta.geometryColumn},4326)),10) from ${params.data.data.dbTable}`
     if (mssql) {
-      sql = `select a.geom.STAsText() as wkt, a.geom.STSrid as srid from (select GEOMETRY::EnvelopeAggregate(${params.data.meta.geometryColumn}) as geom from ${params.data.meta.dbTable}) as a`
+      sql = `select a.geom.STAsText() as wkt, a.geom.STSrid as srid from (select GEOMETRY::EnvelopeAggregate(${params.data.data.geometryColumn}) as geom from ${params.data.data.dbTable}) as a`
     }
     return sequelize.query(sql, { type: sequelize.QueryTypes.SELECT }).then(res => {
       if (res.length > 0) {
@@ -46,21 +41,6 @@ class Service {
         }
       }
     })
-    /*
-    pool.query(sql, (err, res) => {
-      if (err) {
-        return reject(err)
-      }
-      const geojson = {
-        id: id,
-        type: 'Feature',
-        properties: {},
-        geometry: JSON.parse(res.rows[0].st_asgeojson)
-      }
-      resolve(geojson)
-    })
-    */
-    // })
   }
 
   create (data, params) {

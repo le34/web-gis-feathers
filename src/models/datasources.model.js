@@ -15,6 +15,10 @@ module.exports = function (app) {
       type: DataTypes.TEXT,
       allowNull: false
     },
+    data: {
+      type: DataTypes.JSONB,
+      allowNull: true
+    },
     progress: {
       type: DataTypes.FLOAT,
       allowNull: false,
@@ -29,9 +33,10 @@ module.exports = function (app) {
   })
 
   datasources.associate = function (models) { // eslint-disable-line no-unused-vars
+    models.datasources.belongsTo(models.projects, { onDelete: 'CASCADE' }) // generates projectId
     models.datasources.belongsTo(models.companies, { onDelete: 'CASCADE' }) // generates companyId
-    models.datasources.belongsTo(models.companies, { as: 'client' }) // generates clientId
     models.datasources.belongsTo(models.users) // generates userId
+    models.datasources.belongsTo(models.datasourcetypes) // generates datasourcetypeId
   }
 
   return datasources

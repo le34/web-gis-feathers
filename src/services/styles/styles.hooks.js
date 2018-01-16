@@ -1,13 +1,15 @@
 const { authenticate } = require('@feathersjs/authentication').hooks
-
+const { associateCurrentUser } = require('feathers-authentication-hooks')
+const stylesBefore = require('../../hooks/styles-before')
+const getAfter = require('../../hooks/get-after')
 module.exports = {
   before: {
     all: [ authenticate('jwt') ],
-    find: [],
-    get: [],
-    create: [],
-    update: [],
-    patch: [],
+    find: [stylesBefore()],
+    get: [stylesBefore()],
+    create: [associateCurrentUser({ idField: 'id' })],
+    update: [associateCurrentUser({ idField: 'id' })],
+    patch: [associateCurrentUser({ idField: 'id' })],
     remove: []
   },
 
@@ -15,9 +17,9 @@ module.exports = {
     all: [],
     find: [],
     get: [],
-    create: [],
-    update: [],
-    patch: [],
+    create: [getAfter()],
+    update: [getAfter()],
+    patch: [getAfter()],
     remove: []
   },
 

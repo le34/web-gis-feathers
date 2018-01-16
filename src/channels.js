@@ -8,8 +8,15 @@ module.exports = function (app) {
     // On a new real-time connection, add it to the anonymous channel
     app.channel('anonymous').join(connection)
   })
+  app.on('logout', (authResult, { connection }) => {
+    if (connection) {
+      app.channel('authenticated').leave(connection)
+    }
+    console.log('logout', app.channel('authenticated').length)
+  })
 
   app.on('login', (authResult, { connection }) => {
+    console.log('login', app.channel('authenticated').connections.length)
     // connection can be undefined if there is no
     // real-time connection, e.g. when logging in via REST
     if (connection) {
@@ -35,15 +42,15 @@ module.exports = function (app) {
       // app.channel(`userIds/$(user.id}`).join(channel);
     }
   })
-
   app.publish((data, hook) => { // eslint-disable-line no-unused-vars
     // Here you can add event publishers to channels set up in `channels.js`
     // To publish only for a specific event use `app.publish(eventname, () => {})`
 
     // e.g. to publish all service events to all authenticated users use
     // return app.channel('authenticated');
+    return app.channel('authenticated')
+    // console.log('publish', data)
   })
-
   // Here you can also add service specific event publishers
   // e..g the publish the `users` service `created` event to the `admins` channel
   // app.service('users').publish('created', () => app.channel('admins'));

@@ -1,12 +1,12 @@
 const { authenticate } = require('@feathersjs/authentication').hooks
-const { associateCurrentUser } = require('feathers-authentication-hooks')
-const projectsBefore = require('../../hooks/projects-before')
+const layerstylesBefore = require('../../hooks/layerstyles-before')
 const getAfter = require('../../hooks/get-after')
+const { associateCurrentUser } = require('feathers-authentication-hooks')
 module.exports = {
   before: {
-    all: [ ],
-    find: [projectsBefore()],
-    get: [projectsBefore()],
+    all: [],
+    find: [layerstylesBefore()],
+    get: [layerstylesBefore()],
     create: [authenticate('jwt'), associateCurrentUser({ idField: 'id' })],
     update: [authenticate('jwt'), associateCurrentUser({ idField: 'id' })],
     patch: [authenticate('jwt'), associateCurrentUser({ idField: 'id' })],

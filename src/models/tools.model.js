@@ -5,11 +5,19 @@ const DataTypes = Sequelize.DataTypes
 
 module.exports = function (app) {
   const sequelizeClient = app.get('sequelizeClient')
-  const projectsCompanies = sequelizeClient.define('projects_companies', {
+  const tools = sequelizeClient.define('tools', {
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4
+    },
+    name: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true
     }
   }, {
     hooks: {
@@ -19,12 +27,11 @@ module.exports = function (app) {
     }
   })
 
-  projectsCompanies.associate = function (models) { // eslint-disable-line no-unused-vars
+  tools.associate = function (models) { // eslint-disable-line no-unused-vars
     // Define associations here
     // See http://docs.sequelizejs.com/en/latest/docs/associations/
-    models.projects_companies.belongsTo(models.companies, { onDelete: 'CASCADE' }) // generates companyId
-    models.projects_companies.belongsTo(models.projects, { onDelete: 'CASCADE' }) // generates projectId
+    models.tools.belongsTo(models.users) // generates userId
   }
 
-  return projectsCompanies
+  return tools
 }

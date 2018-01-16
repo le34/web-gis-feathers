@@ -2,20 +2,19 @@ const { authenticate } = require('@feathersjs/authentication').hooks
 // const { discard } = require('feathers-hooks-common')
 const tile = require('../../hooks/tile')
 const removeMbtile = require('../../hooks/remove-mbtile')
-const dataBeforeFind = require('../../hooks/data-before-find')
+const datasourcesBefore = require('../../hooks/datasources-before')
 // const noReturning = require('../../hooks/no-returning')
-const dataAfterPatch = require('../../hooks/data-after-patch')
-const dataAfterCreate = require('../../hooks/data-after-create')
+const getAfter = require('../../hooks/get-after')
 // const createGeometries = require('../../hooks/create-geometries')
-
+const { associateCurrentUser } = require('feathers-authentication-hooks')
 module.exports = {
   before: {
     all: [ ],
-    find: [dataBeforeFind()],
-    get: [dataBeforeFind()],
-    create: [authenticate('jwt')],
-    update: [authenticate('jwt')],
-    patch: [authenticate('jwt')], //, noReturning()],
+    find: [datasourcesBefore()],
+    get: [datasourcesBefore()],
+    create: [authenticate('jwt'), associateCurrentUser({ idField: 'id' })],
+    update: [authenticate('jwt'), associateCurrentUser({ idField: 'id' })],
+    patch: [authenticate('jwt'), associateCurrentUser({ idField: 'id' })], //, noReturning()],
     remove: [authenticate('jwt')]
   },
 
@@ -23,9 +22,9 @@ module.exports = {
     all: [],
     find: [],
     get: [],
-    create: [tile(), dataAfterCreate()],
-    update: [tile(), dataAfterCreate()],
-    patch: [dataAfterPatch()],
+    create: [tile(), getAfter()],
+    update: [tile(), getAfter()],
+    patch: [getAfter()],
     remove: [removeMbtile()]
   },
 

@@ -1,13 +1,15 @@
 const rolesData = require('./roles.js')
-const usersData = require('./users.js')
+// const usersData = require('./users.js')
 const companiesData = require('./companies.js')
+const datasourcetypesData = require('./datasourcetypes.js')
 const Tiler = require('../tiler.js')
 
 module.exports = function (app) {
   const ifEmptyCreate2 = ifEmptyCreate.bind(this)
   app.configure(ifEmptyCreate2('roles', rolesData))
-  app.configure(ifEmptyCreate2('users', usersData))
+  // app.configure(ifEmptyCreate2('users', usersData))
   app.configure(ifEmptyCreate2('companies', companiesData))
+  app.configure(ifEmptyCreate2('datasourcetypes', datasourcetypesData))
   app.configure(tile)
 }
 

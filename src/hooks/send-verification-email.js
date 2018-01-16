@@ -4,7 +4,7 @@ const accountService = require('../notifier')
 module.exports = function (options = {}) { // eslint-disable-line no-unused-vars
   return function sendVerificationEmail (hook) {
     const user = hook.result
-    if (user) {
+    if (hook.params.provider && user) {
       accountService(hook.app).notifier('resendVerifySignup', user)
       return Promise.resolve(hook)
     }

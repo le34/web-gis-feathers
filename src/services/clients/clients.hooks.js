@@ -1,14 +1,15 @@
 
 const clientsBefore = require('../../hooks/clients-before')
-const clientsAfter = require('../../hooks/clients-after')
+const getAfter = require('../../hooks/get-after')
+const { associateCurrentUser } = require('feathers-authentication-hooks')
 module.exports = {
   before: {
     all: [],
     find: [clientsBefore()],
     get: [clientsBefore()],
-    create: [],
-    update: [],
-    patch: [],
+    create: [associateCurrentUser({ idField: 'id' })],
+    update: [associateCurrentUser({ idField: 'id' })],
+    patch: [associateCurrentUser({ idField: 'id' })],
     remove: []
   },
 
@@ -16,9 +17,9 @@ module.exports = {
     all: [],
     find: [],
     get: [],
-    create: [clientsAfter()],
-    update: [clientsAfter()],
-    patch: [clientsAfter()],
+    create: [getAfter()],
+    update: [getAfter()],
+    patch: [getAfter()],
     remove: []
   },
 

@@ -4,7 +4,7 @@ module.exports = function (app) {
   const connectionString = app.get('postgres')
   const sequelize = new Sequelize(connectionString, {
     dialect: 'postgres',
-    logging: true,
+    logging: false,
     define: {
       freezeTableName: true
     }

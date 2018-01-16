@@ -5,14 +5,12 @@ const DataTypes = Sequelize.DataTypes
 
 module.exports = function (app) {
   const sequelizeClient = app.get('sequelizeClient')
-  const roles = sequelizeClient.define('roles', {
+  const datasourcetypes = sequelizeClient.define('datasourcetypes', {
     name: {
       type: DataTypes.STRING,
-      allowNull: false,
-      unique: true
+      allowNull: false
     }
-  },
-  {
+  }, {
     hooks: {
       beforeCount (options) {
         options.raw = true
@@ -20,10 +18,10 @@ module.exports = function (app) {
     }
   })
 
-  roles.associate = function (models) { // eslint-disable-line no-unused-vars
+  datasourcetypes.associate = function (models) { // eslint-disable-line no-unused-vars
     // Define associations here
     // See http://docs.sequelizejs.com/en/latest/docs/associations/
   }
 
-  return roles
+  return datasourcetypes
 }

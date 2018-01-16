@@ -3,14 +3,14 @@
 const fs = require('fs')
 const path = require('path')
 module.exports = function (options = {}) { // eslint-disable-line no-unused-vars
-  return function removeMbtile (hook) {
+  return context => {
     // Hooks can either return nothing or a promise
     // that resolves with the `hook` object for asynchronous operations
-    fs.unlink(path.join(process.env.MBTILES, hook.id + '.mbtiles'), err => {
+    fs.unlink(path.join(process.env.MBTILES, context.id + '.mbtiles'), err => {
       if (err) {
         console.log('remove-mbtile', err)
       }
     })
-    return Promise.resolve(hook)
+    return context
   }
 }

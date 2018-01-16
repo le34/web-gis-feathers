@@ -1,9 +1,9 @@
 
-const totalsBefore = require('../../hooks/totals-before')
+const { authenticate } = require('@feathersjs/authentication').hooks
 module.exports = {
   before: {
-    all: [],
-    find: [totalsBefore()],
+    all: [ authenticate('jwt') ],
+    find: [],
     get: [],
     create: [],
     update: [],

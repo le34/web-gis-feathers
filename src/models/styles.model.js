@@ -15,14 +15,15 @@ module.exports = function (app) {
       type: DataTypes.TEXT,
       allowNull: false
     },
-    data: {
+    light: {
       type: DataTypes.JSONB,
       allowNull: true
     },
-    global: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false
+    dark: {
+      type: DataTypes.JSONB,
+      allowNull: true
     }
+
   }, {
     hooks: {
       beforeCount (options) {
@@ -32,7 +33,7 @@ module.exports = function (app) {
   })
 
   styles.associate = function (models) { // eslint-disable-line no-unused-vars
-    models.styles.belongsTo(models.companies, { onDelete: 'CASCADE' }) // generates companyId
+    models.styles.belongsTo(models.projects, { onDelete: 'CASCADE' }) // generates projectId
     models.styles.belongsTo(models.users) // generates userId
   }
 

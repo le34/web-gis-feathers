@@ -3,9 +3,12 @@
 
 module.exports = function (options = {}) { // eslint-disable-line no-unused-vars
   return context => {
-    return context.service.get(context.result.id).then(result => {
-      context.result = result
-      return context
-    })
+    context.params.sequelize = {
+      include: [
+        { model: context.app.services.users.Model, attributes: ['email'] },
+        { model: context.app.services.projects.Model }
+      ]
+    }
+    return context
   }
 }

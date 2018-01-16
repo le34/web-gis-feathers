@@ -1,38 +1,38 @@
-// Use this hook to manipulate incoming or outgoing data.
-// For more information on hooks see: http://docs.feathersjs.com/api/hooks.html
+// Use this context to manipulate incoming or outgoing data.
+// For more information on contexts see: http://docs.feathersjs.com/api/contexts.html
 const fs = require('fs')
 const path = require('path')
 const Tiler = require('../tiler.js')
 module.exports = function (options = {}) { // eslint-disable-line no-unused-vars
-  return function tile (hook) {
-    const service = hook.app.service('datasources')
+  return context => {
     Promise.resolve().then(() => {
-      if (hook.data.geojson) {
-        return hook.data.geojson
-      } else if (hook.data.meta && hook.data.meta.tile) {
-        return hook.app.service('db').get(hook.result.id)
+      console.log(context.data)
+      if (context.data.geojson) {
+        return context.data.geojson
+      } else if (context.data.data && context.data.data.tile) {
+        return context.app.service('db').get(context.result.id)
       }
     }).then(geojson => {
       if (geojson) {
         console.log('geojson')
-        fs.unlink(path.join(process.env.MBTILES, hook.id + '.mbtiles'), err => {
+        fs.unlink(path.join(process.env.MBTILES, context.id + '.mbtiles'), err => {
           if (err) {
             console.log('remove-mbtile', err)
           }
 
-          hook.data.geojson = geojson
-          const tiler = new Tiler(hook.result.id, hook.data, service)
+          context.data.geojson = geojson
+          const tiler = new Tiler(context.result.id, context.data, context.service)
           tiler.create()
-          const geometryService = hook.app.service('geometries')
+          const geometryService = context.app.service('geometries')
           let data = []
-          hook.data.geojson.features.forEach(feature => {
+          context.data.geojson.features.forEach(feature => {
             const geometry = Object.assign({}, feature.geometry)
             geometry.crs = { type: 'name', properties: { name: 'EPSG:4326' } }
-            data.push({dataId: hook.result.id, properties: feature.properties, geom: geometry})
+            data.push({datasourceId: context.result.id, properties: feature.properties, geom: geometry})
           })
           geometryService.remove(null, {
             query: {
-              dataId: hook.result.id
+              datasourceId: context.result.id
             }
           }).then(res => {
             geometryService.create(data)
@@ -40,9 +40,9 @@ module.exports = function (options = {}) { // eslint-disable-line no-unused-vars
         })
       } else {
         console.log('patch')
-        service.patch(hook.result.id, { progress: 100 })
+        context.service.patch(context.result.id, { progress: 100 })
       }
     })
-    return Promise.resolve(hook)
+    return context
   }
 }
