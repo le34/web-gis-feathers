@@ -30,37 +30,15 @@ Tiler.prototype.remove = function () {
 }
 
 Tiler.prototype.putTile = function () {
-  if (this._current === this._tileIndex.tileCoords.length) {
-    var center = centerOfMass(this._data.geojson)
-    this._mbtiles.putInfo({
-      bounds: bbox(this._data.geojson),
-      center: [center.geometry.coordinates[0], center.geometry.coordinates[1], 16],
-      version: '2',
-      name: this._id,
-      description: this._data.name,
-      type: 'overlay',
-      format: 'pbf',
-      'vector_layers': this._features.map((id) => {
-        return {
-          id: id, description: '', minzoom: 0, maxzoom: 22, fields: {}
-        }
-      })
-    }, () => {
-      this._mbtiles.stopWriting(() => {
-        this._mbtiles.close(() => {
-          console.log('closed')
-        })
-      })
-    })
-  } else {
+  if (this._current !== this._tileIndex.tileCoords.length) {
+    const item = this._tileIndex.tileCoords[this._current]
     const progress = Math.round(100 * (this._current + 1) / this._tileIndex.tileCoords.length)
-    Promise.resolve().then(() => {
+    return Promise.resolve().then(() => {
       if (progress > this._last) {
         this._last = progress
         return this._service.patch(this._id, { progress })
       }
     }).then(() => {
-      const item = this._tileIndex.tileCoords[this._current]
       var tile = this._tileIndex.getTile(item.z, item.x, item.y)
       var layers = {}
       tile.features.forEach((feature) => {
@@ -84,20 +62,32 @@ Tiler.prototype.putTile = function () {
         layers: layers2
       })
       var buffer = Buffer.from(buff)
-      zlib.gzip(buffer, (err, result) => {
-        if (!err) {
-          this._mbtiles.putTile(item.z, item.x, item.y, result, () => {
-            this._current++
-            this.putTile()
-          })
-        }
+      return new Promise((resolve, reject) => {
+        zlib.gzip(buffer, (err, result) => {
+          if (err) {
+            return reject(err)
+          }
+          resolve(result)
+        })
       })
+    }).then(result => {
+      return new Promise((resolve, reject) => {
+        this._mbtiles.putTile(item.z, item.x, item.y, result, (err) => {
+          if (err) {
+            return reject(err)
+          }
+          resolve()
+        })
+      })
+    }).then(() => {
+      this._current++
+      return this.putTile()
     })
   }
 }
 
 Tiler.prototype.create = function () {
-  Promise.resolve().then(() => {
+  return Promise.resolve().then(() => {
     return geojsonvt(this._data.geojson, { debug: 0, maxZoom: 20, indexMaxZoom: 20, indexMaxPoints: 0 })
   }).then((tileIndex) => {
     this._tileIndex = tileIndex
@@ -124,8 +114,48 @@ Tiler.prototype.create = function () {
       })
     })
   }).then(() => {
-    this.putTile()
-  }).catch((err) => {
-    console.log(err)
+    return this.putTile()
+  }).then(() => {
+    var center = centerOfMass(this._data.geojson)
+    return new Promise((resolve, reject) => {
+      this._mbtiles.putInfo({
+        bounds: bbox(this._data.geojson),
+        center: [center.geometry.coordinates[0], center.geometry.coordinates[1], 16],
+        version: '2',
+        name: this._id,
+        description: this._data.name,
+        type: 'overlay',
+        format: 'pbf',
+        'vector_layers': this._features.map((id) => {
+          return {
+            id: id, description: '', minzoom: 0, maxzoom: 22, fields: {}
+          }
+        })
+      }, (err) => {
+        if (err) {
+          return reject(err)
+        }
+        resolve()
+      })
+    })
+  }).then(() => {
+    return new Promise((resolve, reject) => {
+      this._mbtiles.stopWriting((err) => {
+        if (err) {
+          return reject(err)
+        }
+        resolve()
+      })
+    })
+  }).then(() => {
+    return new Promise((resolve, reject) => {
+      this._mbtiles.close((err) => {
+        if (err) {
+          return reject(err)
+        }
+        console.log('closed')
+        resolve()
+      })
+    })
   })
 }

@@ -17,7 +17,7 @@ class Service {
 
   async get (id, params) {
     const mbtilesFile = path.join(filePath, id + '.mbtiles')
-    if (params.query.hasOwnProperty('format')) {
+    if (params.query && params.query.hasOwnProperty('format')) {
       try {
         const z = params.query.z | 0
         const x = params.query.x | 0

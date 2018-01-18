@@ -7,6 +7,7 @@ const datasourcesBefore = require('../../hooks/datasources-before')
 const getAfter = require('../../hooks/get-after')
 // const createGeometries = require('../../hooks/create-geometries')
 const { associateCurrentUser } = require('feathers-authentication-hooks')
+const datasourcesBeforeRemove = require('../../hooks/datasources-before-remove')
 module.exports = {
   before: {
     all: [ ],
@@ -15,7 +16,7 @@ module.exports = {
     create: [authenticate('jwt'), associateCurrentUser({ idField: 'id' })],
     update: [authenticate('jwt'), associateCurrentUser({ idField: 'id' })],
     patch: [authenticate('jwt'), associateCurrentUser({ idField: 'id' })], //, noReturning()],
-    remove: [authenticate('jwt')]
+    remove: [authenticate('jwt'), datasourcesBeforeRemove()]
   },
 
   after: {

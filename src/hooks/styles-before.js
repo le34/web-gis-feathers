@@ -6,7 +6,8 @@ module.exports = function (options = {}) { // eslint-disable-line no-unused-vars
     context.params.sequelize = {
       include: [
         { model: context.app.services.users.Model, attributes: ['email'] },
-        { model: context.app.services.projects.Model }
+        { model: context.app.services.projects.Model },
+        { model: context.app.services.datasources.Model }
       ]
     }
     return context

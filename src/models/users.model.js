@@ -11,6 +11,9 @@ module.exports = function (app) {
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4
     },
+    name: {
+      type: DataTypes.STRING
+    },
     email: {
       type: DataTypes.STRING,
       allowNull: false,

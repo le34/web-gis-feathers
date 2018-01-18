@@ -34,22 +34,19 @@ class LDAPVerifier {
     }
 
     // Look up the entity
-    this.service.find(params)
-      .then(response => {
-        const results = response.data || response
-        if (!results.length) {
-          return this.service.create({email: user.mail, companyId: '6714a515-bec0-4d2b-a5e4-76d16cb845c0'}).then(response => {
-            return this._normalizeResult(response)
-          })
-        }
-        return this._normalizeResult(response)
-      })
-      .then(entity => {
-        const id = entity[this.service.id]
-        const payload = { [`${this.options.entity}Id`]: id }
-        done(null, entity, payload)
-      })
-      .catch(error => error ? done(error) : done(null, error, { message: 'Invalid login' }))
+    this.service.find(params).then(response => {
+      const results = response.data || response
+      if (!results.length) {
+        return this.service.create({email: user.mail, name: user.cn, companyId: '6714a515-bec0-4d2b-a5e4-76d16cb845c0'}).then(response => {
+          return this._normalizeResult([response])
+        })
+      }
+      return this._normalizeResult(response)
+    }).then(entity => {
+      const id = entity[this.service.id]
+      const payload = { [`${this.options.entity}Id`]: id }
+      done(null, entity, payload)
+    }).catch(error => error ? done(error) : done(null, error, { message: 'Invalid login' }))
   }
 }
 

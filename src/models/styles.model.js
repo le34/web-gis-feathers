@@ -34,6 +34,7 @@ module.exports = function (app) {
 
   styles.associate = function (models) { // eslint-disable-line no-unused-vars
     models.styles.belongsTo(models.projects, { onDelete: 'CASCADE' }) // generates projectId
+    models.styles.belongsTo(models.datasources, { onDelete: 'CASCADE' }) // generates datasourceId
     models.styles.belongsTo(models.users) // generates userId
   }
 

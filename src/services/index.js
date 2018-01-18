@@ -26,6 +26,8 @@ const projectsTools = require('./projects-tools/projects-tools.service.js')
 
 const logos = require('./logos/logos.service.js')
 
+const codetables = require('./codetables/codetables.service.js')
+
 module.exports = function (app) {
   app.configure(users)
   app.configure(roles)
@@ -42,11 +44,11 @@ module.exports = function (app) {
   app.configure(extent)
   app.configure(styles)
   app.configure(layers)
-  // app.configure(layerstyles)
   app.configure(clients)
   app.configure(datasourcetypes)
   app.configure(tiles)
   app.configure(tools)
   app.configure(projectsTools)
   app.configure(logos)
+  app.configure(codetables)
 }

@@ -87,13 +87,13 @@ module.exports = require("@feathersjs/authentication");
 /* 3 */
 /***/ (function(module, exports) {
 
-module.exports = require("feathers-authentication-hooks");
+module.exports = require("path");
 
 /***/ }),
 /* 4 */
 /***/ (function(module, exports) {
 
-module.exports = require("path");
+module.exports = require("feathers-authentication-hooks");
 
 /***/ }),
 /* 5 */
@@ -146,7 +146,7 @@ module.exports = require("feathers-authentication-management");
 /* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(__dirname) {const path = __webpack_require__(4);
+/* WEBPACK VAR INJECTION */(function(__dirname) {const path = __webpack_require__(3);
 const pug = __webpack_require__(36);
 const isProd = "development" === 'production';
 const returnEmail = 'noreply@le34.dk';
@@ -255,7 +255,7 @@ module.exports = function (app) {
 /* eslint no-new: 0 */
 var geojsonvt = __webpack_require__(67);
 var MBTiles = __webpack_require__(13);
-var path = __webpack_require__(4);
+var path = __webpack_require__(3);
 var vtpbf = __webpack_require__(68);
 var zlib = __webpack_require__(14);
 var fs = __webpack_require__(6);
@@ -284,37 +284,15 @@ Tiler.prototype.remove = function () {
 };
 
 Tiler.prototype.putTile = function () {
-  if (this._current === this._tileIndex.tileCoords.length) {
-    var center = centerOfMass(this._data.geojson);
-    this._mbtiles.putInfo({
-      bounds: bbox(this._data.geojson),
-      center: [center.geometry.coordinates[0], center.geometry.coordinates[1], 16],
-      version: '2',
-      name: this._id,
-      description: this._data.name,
-      type: 'overlay',
-      format: 'pbf',
-      'vector_layers': this._features.map(id => {
-        return {
-          id: id, description: '', minzoom: 0, maxzoom: 22, fields: {}
-        };
-      })
-    }, () => {
-      this._mbtiles.stopWriting(() => {
-        this._mbtiles.close(() => {
-          console.log('closed');
-        });
-      });
-    });
-  } else {
+  if (this._current !== this._tileIndex.tileCoords.length) {
+    const item = this._tileIndex.tileCoords[this._current];
     const progress = Math.round(100 * (this._current + 1) / this._tileIndex.tileCoords.length);
-    Promise.resolve().then(() => {
+    return Promise.resolve().then(() => {
       if (progress > this._last) {
         this._last = progress;
         return this._service.patch(this._id, { progress });
       }
     }).then(() => {
-      const item = this._tileIndex.tileCoords[this._current];
       var tile = this._tileIndex.getTile(item.z, item.x, item.y);
       var layers = {};
       tile.features.forEach(feature => {
@@ -338,20 +316,32 @@ Tiler.prototype.putTile = function () {
         layers: layers2
       });
       var buffer = Buffer.from(buff);
-      zlib.gzip(buffer, (err, result) => {
-        if (!err) {
-          this._mbtiles.putTile(item.z, item.x, item.y, result, () => {
-            this._current++;
-            this.putTile();
-          });
-        }
+      return new Promise((resolve, reject) => {
+        zlib.gzip(buffer, (err, result) => {
+          if (err) {
+            return reject(err);
+          }
+          resolve(result);
+        });
       });
+    }).then(result => {
+      return new Promise((resolve, reject) => {
+        this._mbtiles.putTile(item.z, item.x, item.y, result, err => {
+          if (err) {
+            return reject(err);
+          }
+          resolve();
+        });
+      });
+    }).then(() => {
+      this._current++;
+      return this.putTile();
     });
   }
 };
 
 Tiler.prototype.create = function () {
-  Promise.resolve().then(() => {
+  return Promise.resolve().then(() => {
     return geojsonvt(this._data.geojson, { debug: 0, maxZoom: 20, indexMaxZoom: 20, indexMaxPoints: 0 });
   }).then(tileIndex => {
     this._tileIndex = tileIndex;
@@ -378,9 +368,49 @@ Tiler.prototype.create = function () {
       });
     });
   }).then(() => {
-    this.putTile();
-  }).catch(err => {
-    console.log(err);
+    return this.putTile();
+  }).then(() => {
+    var center = centerOfMass(this._data.geojson);
+    return new Promise((resolve, reject) => {
+      this._mbtiles.putInfo({
+        bounds: bbox(this._data.geojson),
+        center: [center.geometry.coordinates[0], center.geometry.coordinates[1], 16],
+        version: '2',
+        name: this._id,
+        description: this._data.name,
+        type: 'overlay',
+        format: 'pbf',
+        'vector_layers': this._features.map(id => {
+          return {
+            id: id, description: '', minzoom: 0, maxzoom: 22, fields: {}
+          };
+        })
+      }, err => {
+        if (err) {
+          return reject(err);
+        }
+        resolve();
+      });
+    });
+  }).then(() => {
+    return new Promise((resolve, reject) => {
+      this._mbtiles.stopWriting(err => {
+        if (err) {
+          return reject(err);
+        }
+        resolve();
+      });
+    });
+  }).then(() => {
+    return new Promise((resolve, reject) => {
+      this._mbtiles.close(err => {
+        if (err) {
+          return reject(err);
+        }
+        console.log('closed');
+        resolve();
+      });
+    });
   });
 };
 
@@ -456,7 +486,7 @@ server.on('listening', () => logger.info('Feathers application started on http:/
 /* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const path = __webpack_require__(4);
+const path = __webpack_require__(3);
 const favicon = __webpack_require__(22);
 const compress = __webpack_require__(23);
 const cors = __webpack_require__(24);
@@ -474,12 +504,12 @@ const socketio = __webpack_require__(29);
 
 const middleware = __webpack_require__(30);
 const services = __webpack_require__(31);
-const appHooks = __webpack_require__(122);
-const channels = __webpack_require__(124);
+const appHooks = __webpack_require__(130);
+const channels = __webpack_require__(132);
 
-const authentication = __webpack_require__(125);
+const authentication = __webpack_require__(133);
 
-const sequelize = __webpack_require__(129);
+const sequelize = __webpack_require__(137);
 
 const app = express(feathers());
 
@@ -587,25 +617,27 @@ const cvr = __webpack_require__(51);
 const fonts = __webpack_require__(56);
 const files = __webpack_require__(59);
 const datasources = __webpack_require__(63);
-const projects = __webpack_require__(73);
-const geometries = __webpack_require__(77);
-const totals = __webpack_require__(81);
-const db = __webpack_require__(86);
-const extent = __webpack_require__(89);
-const styles = __webpack_require__(92);
-const layers = __webpack_require__(96);
+const projects = __webpack_require__(75);
+const geometries = __webpack_require__(79);
+const totals = __webpack_require__(83);
+const db = __webpack_require__(88);
+const extent = __webpack_require__(91);
+const styles = __webpack_require__(94);
+const layers = __webpack_require__(99);
 // const layerstyles = require('./layerstyles/layerstyles.service.js')
-const clients = __webpack_require__(100);
+const clients = __webpack_require__(103);
 
-const datasourcetypes = __webpack_require__(104);
+const datasourcetypes = __webpack_require__(107);
 
-const tiles = __webpack_require__(107);
+const tiles = __webpack_require__(110);
 
-const tools = __webpack_require__(111);
+const tools = __webpack_require__(114);
 
-const projectsTools = __webpack_require__(115);
+const projectsTools = __webpack_require__(118);
 
-const logos = __webpack_require__(119);
+const logos = __webpack_require__(122);
+
+const codetables = __webpack_require__(125);
 
 module.exports = function (app) {
   app.configure(users);
@@ -623,13 +655,13 @@ module.exports = function (app) {
   app.configure(extent);
   app.configure(styles);
   app.configure(layers);
-  // app.configure(layerstyles)
   app.configure(clients);
   app.configure(datasourcetypes);
   app.configure(tiles);
   app.configure(tools);
   app.configure(projectsTools);
   app.configure(logos);
+  app.configure(codetables);
 };
 
 /***/ }),
@@ -679,6 +711,9 @@ module.exports = function (app) {
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4
     },
+    name: {
+      type: DataTypes.STRING
+    },
     email: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -726,7 +761,7 @@ module.exports = function (app) {
 
 const { authenticate } = __webpack_require__(2).hooks;
 const commonHooks = __webpack_require__(8);
-const { restrictToOwner } = __webpack_require__(3);
+const { restrictToOwner } = __webpack_require__(4);
 const { hashPassword } = __webpack_require__(9).hooks;
 const verifyHooks = __webpack_require__(10).hooks;
 const restrict = [authenticate('jwt'), restrictToOwner({
@@ -1396,7 +1431,7 @@ module.exports = function (app) {
 /***/ (function(module, exports, __webpack_require__) {
 
 const fs = __webpack_require__(6);
-const path = __webpack_require__(4);
+const path = __webpack_require__(3);
 const filePath = process.env.MBTILES;
 
 class Service {
@@ -1596,12 +1631,13 @@ module.exports = function (app) {
 const { authenticate } = __webpack_require__(2).hooks;
 // const { discard } = require('feathers-hooks-common')
 const tile = __webpack_require__(66);
-const removeMbtile = __webpack_require__(71);
-const datasourcesBefore = __webpack_require__(72);
+const removeMbtile = __webpack_require__(72);
+const datasourcesBefore = __webpack_require__(73);
 // const noReturning = require('../../hooks/no-returning')
 const getAfter = __webpack_require__(5);
 // const createGeometries = require('../../hooks/create-geometries')
-const { associateCurrentUser } = __webpack_require__(3);
+const { associateCurrentUser } = __webpack_require__(4);
+const datasourcesBeforeRemove = __webpack_require__(74);
 module.exports = {
   before: {
     all: [],
@@ -1610,7 +1646,7 @@ module.exports = {
     create: [authenticate('jwt'), associateCurrentUser({ idField: 'id' })],
     update: [authenticate('jwt'), associateCurrentUser({ idField: 'id' })],
     patch: [authenticate('jwt'), associateCurrentUser({ idField: 'id' })], //, noReturning()],
-    remove: [authenticate('jwt')]
+    remove: [authenticate('jwt'), datasourcesBeforeRemove()]
   },
 
   after: {
@@ -1641,13 +1677,14 @@ module.exports = {
 // Use this context to manipulate incoming or outgoing data.
 // For more information on contexts see: http://docs.feathersjs.com/api/contexts.html
 const fs = __webpack_require__(6);
-const path = __webpack_require__(4);
+const path = __webpack_require__(3);
 const Tiler = __webpack_require__(12);
+const v4 = __webpack_require__(71);
+// const util = require('util')
 module.exports = function (options = {}) {
   // eslint-disable-line no-unused-vars
   return context => {
     Promise.resolve().then(() => {
-      console.log(context.data);
       if (context.data.geojson) {
         return context.data.geojson;
       } else if (context.data.data && context.data.data.tile) {
@@ -1655,33 +1692,220 @@ module.exports = function (options = {}) {
       }
     }).then(geojson => {
       if (geojson) {
+        const geometryService = context.app.service('geometries');
         console.log('geojson');
-        fs.unlink(path.join(process.env.MBTILES, context.id + '.mbtiles'), err => {
-          if (err) {
-            console.log('remove-mbtile', err);
-          }
-
+        return new Promise((resolve, reject) => {
+          fs.unlink(path.join(process.env.MBTILES, context.result.id + '.mbtiles'), err => {
+            if (err) {
+              console.log('remove-mbtile', err);
+            }
+            resolve();
+          });
+        }).then(() => {
           context.data.geojson = geojson;
           const tiler = new Tiler(context.result.id, context.data, context.service);
-          tiler.create();
-          const geometryService = context.app.service('geometries');
+          return tiler.create();
+        }).then(() => {
+          return geometryService.remove(null, {
+            query: {
+              datasourceId: context.result.id
+            }
+          });
+        }).then(() => {
           let data = [];
           context.data.geojson.features.forEach(feature => {
             const geometry = Object.assign({}, feature.geometry);
             geometry.crs = { type: 'name', properties: { name: 'EPSG:4326' } };
             data.push({ datasourceId: context.result.id, properties: feature.properties, geom: geometry });
           });
-          geometryService.remove(null, {
-            query: {
-              datasourceId: context.result.id
-            }
-          }).then(res => {
-            geometryService.create(data);
-          });
+          return geometryService.create(data);
         });
-      } else {
-        console.log('patch');
-        context.service.patch(context.result.id, { progress: 100 });
+      }
+    }).then(() => {
+      return context.service.patch(context.result.id, { progress: 100 });
+    }).then(() => {
+      if (context.method === 'create') {
+        Promise.resolve().then(() => {
+          let style = {
+            name: context.data.name,
+            projectId: context.data.projectId,
+            dark: {
+              version: 8,
+              sources: {},
+              layers: [{
+                id: 'background',
+                type: 'background',
+                paint: {
+                  'background-color': '#000000'
+                }
+              }]
+            },
+            light: {
+              version: 8,
+              sources: {},
+              layers: [{
+                id: 'background',
+                type: 'background',
+                paint: {
+                  'background-color': '#ffffff'
+                }
+              }]
+            }
+          };
+          if (context.result.datasourcetypeId < 3) {
+            let codeTables = {};
+            return context.app.service('tiles').get(context.result.id).then(tileJson => {
+              if (tileJson.format === 'pbf') {
+                let sources = {
+                  [context.result.id]: {
+                    type: 'vector',
+                    tiles: tileJson.tiles,
+                    minzoom: tileJson.minzoom,
+                    maxzoom: tileJson.maxzoom,
+                    bounds: tileJson.bounds
+                  }
+                };
+                style.light.sources = sources;
+                style.dark.sources = sources;
+                const promises = [];
+                tileJson.vector_layers.forEach(data => {
+                  if (data.id) {
+                    const layerid = data.id.split('#');
+                    if (layerid.length > 1) {
+                      const kode = layerid[0];
+                      if (!codeTables.hasOwnProperty(kode)) {
+                        promises.push(context.app.service('codetables').get(kode));
+                        codeTables[kode] = {};
+                      }
+                    }
+                  }
+                });
+                return Promise.all(promises).then(items => {
+                  items.forEach(item => {
+                    codeTables[item.id] = item.layers;
+                  });
+                  tileJson.vector_layers.forEach(data => {
+                    const layerid = data.id.split('#');
+                    if (layerid.length > 1) {
+                      const kode = layerid[0];
+                      const name = data.id.substr(kode.length + 1);
+                      const kodetabel = codeTables[kode];
+                      if (kodetabel.hasOwnProperty(name)) {
+                        let id = v4();
+                        let layerlight = JSON.parse(JSON.stringify(kodetabel[name]));
+                        let layerdark = JSON.parse(JSON.stringify(kodetabel[name]));
+                        layerlight.id = id;
+                        layerdark.id = id;
+                        layerlight.metadata = { name: layerlight.name || name };
+                        layerdark.metadata = { name: layerdark.name || name };
+                        layerlight.source = context.result.id;
+                        layerdark.source = context.result.id;
+                        layerlight['source-layer'] = data.id;
+                        layerdark['source-layer'] = data.id;
+                        delete layerlight.name;
+                        delete layerdark.name;
+                        delete layerlight.category;
+                        delete layerdark.category;
+                        if (layerlight.paint.hasOwnProperty('line-color') && layerlight.paint['line-color'] === '#ffffff') {
+                          layerlight.paint['line-color'] = '#000000';
+                        } else if (layerlight.paint.hasOwnProperty('circle-color') && layerlight.paint['circle-color'] === '#ffffff') {
+                          layerlight.paint['circle-color'] = '#000000';
+                        }
+                        style.light.layers.push(layerlight);
+                        if (layerdark.paint.hasOwnProperty('line-color') && layerdark.paint['line-color'] === '#000000') {
+                          layerdark.paint['line-color'] = '#ffffff';
+                        } else if (layerdark.paint.hasOwnProperty('circle-color') && layerdark.paint['circle-color'] === '#000000') {
+                          layerdark.paint['circle-color'] = '#ffffff';
+                        }
+                        style.dark.layers.push(layerdark);
+                      }
+                    } else {
+                      const layerCircle = {
+                        id: v4(),
+                        metadata: { name: data.id },
+                        source: context.result.id,
+                        'source-layer': data.id,
+                        type: 'circle',
+                        paint: { 'circle-color': '#FF0000' }
+                      };
+                      const layerLine = {
+                        id: v4(),
+                        metadata: { name: data.id },
+                        source: context.result.id,
+                        'source-layer': data.id,
+                        type: 'line',
+                        paint: { 'line-color': '#FF0000' }
+                      };
+                      style.light.layers.push(layerCircle);
+                      style.light.layers.push(layerLine);
+                      style.dark.layers.push(layerCircle);
+                      style.dark.layers.push(layerLine);
+                    }
+                  });
+                  return style;
+                });
+              } else {
+                const sources = {
+                  [context.result.id]: {
+                    type: 'raster',
+                    tiles: tileJson.tiles,
+                    minzoom: tileJson.minzoom,
+                    maxzoom: tileJson.maxzoom,
+                    bounds: tileJson.bounds,
+                    tileSize: 256
+                  }
+                };
+                const layer = {
+                  id: v4(),
+                  type: 'raster',
+                  source: context.result.id,
+                  metadata: context.result.name
+                };
+                style.light.sources = sources;
+                style.dark.sources = sources;
+                style.light.layers.push(layer);
+                style.dark.layers.push(layer);
+                return style;
+              }
+            });
+          } else {
+            const sources = {
+              [context.result.id]: {
+                type: 'geojson',
+                data: `${process.env.FEATHERS}/db/${context.result.id}`
+              }
+            };
+            const layerCircle = {
+              id: v4(),
+              source: context.result.id,
+              type: 'circle',
+              paint: { 'circle-color': '#FF0000' }
+            };
+            const layerLine = {
+              id: v4(),
+              source: context.result.id,
+              type: 'line',
+              paint: { 'line-color': '#FF0000' }
+            };
+            style.light.sources = sources;
+            style.dark.sources = sources;
+            style.light.layers.push(layerCircle);
+            style.light.layers.push(layerLine);
+            style.dark.layers.push(layerCircle);
+            style.dark.layers.push(layerLine);
+            return style;
+          }
+        }).then(style => {
+          // console.log(util.inspect(style, {depth: null, colors: true}))
+          style.datasourceId = context.result.id;
+          return context.app.service('styles').create(style, context.params);
+        }).then(style => {
+          context.app.service('layers').create({
+            projectId: context.result.projectId,
+            styleId: style.id,
+            name: style.name
+          }, context.params);
+        });
       }
     });
     return context;
@@ -1714,12 +1938,18 @@ module.exports = require("@turf/center-of-mass");
 
 /***/ }),
 /* 71 */
+/***/ (function(module, exports) {
+
+module.exports = require("uuid/v4");
+
+/***/ }),
+/* 72 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Use this hook to manipulate incoming or outgoing data.
 // For more information on hooks see: http://docs.feathersjs.com/api/hooks.html
 const fs = __webpack_require__(6);
-const path = __webpack_require__(4);
+const path = __webpack_require__(3);
 module.exports = function (options = {}) {
   // eslint-disable-line no-unused-vars
   return context => {
@@ -1735,7 +1965,7 @@ module.exports = function (options = {}) {
 };
 
 /***/ }),
-/* 72 */
+/* 73 */
 /***/ (function(module, exports) {
 
 // Use this hook to manipulate incoming or outgoing data.
@@ -1752,13 +1982,40 @@ module.exports = function (options = {}) {
 };
 
 /***/ }),
-/* 73 */
+/* 74 */
+/***/ (function(module, exports) {
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
+// Use this hook to manipulate incoming or outgoing data.
+// For more information on hooks see: http://docs.feathersjs.com/api/hooks.html
+
+module.exports = function (options = {}) {
+  // eslint-disable-line no-unused-vars
+  return (() => {
+    var _ref = _asyncToGenerator(function* (context) {
+      yield context.app.service('styles').remove(null, {
+        query: {
+          datasourceId: context.id
+        }
+      });
+      return context;
+    });
+
+    return function (_x) {
+      return _ref.apply(this, arguments);
+    };
+  })();
+};
+
+/***/ }),
+/* 75 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Initializes the `projects` service on path `/projects`
 const createService = __webpack_require__(1);
-const createModel = __webpack_require__(74);
-const hooks = __webpack_require__(75);
+const createModel = __webpack_require__(76);
+const hooks = __webpack_require__(77);
 
 module.exports = function (app) {
   const Model = createModel(app);
@@ -1779,7 +2036,7 @@ module.exports = function (app) {
 };
 
 /***/ }),
-/* 74 */
+/* 76 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // See http://docs.sequelizejs.com/en/latest/docs/models-definition/
@@ -1821,12 +2078,12 @@ module.exports = function (app) {
 };
 
 /***/ }),
-/* 75 */
+/* 77 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const { authenticate } = __webpack_require__(2).hooks;
-const { associateCurrentUser } = __webpack_require__(3);
-const projectsBefore = __webpack_require__(76);
+const { associateCurrentUser } = __webpack_require__(4);
+const projectsBefore = __webpack_require__(78);
 const getAfter = __webpack_require__(5);
 module.exports = {
   before: {
@@ -1861,7 +2118,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 76 */
+/* 78 */
 /***/ (function(module, exports) {
 
 // Use this hook to manipulate incoming or outgoing data.
@@ -1878,13 +2135,13 @@ module.exports = function (options = {}) {
 };
 
 /***/ }),
-/* 77 */
+/* 79 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Initializes the `geometries` service on path `/geometries`
 const createService = __webpack_require__(1);
-const createModel = __webpack_require__(78);
-const hooks = __webpack_require__(79);
+const createModel = __webpack_require__(80);
+const hooks = __webpack_require__(81);
 
 module.exports = function (app) {
   const Model = createModel(app);
@@ -1905,7 +2162,7 @@ module.exports = function (app) {
 };
 
 /***/ }),
-/* 78 */
+/* 80 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // See http://docs.sequelizejs.com/en/latest/docs/models-definition/
@@ -1946,11 +2203,11 @@ module.exports = function (app) {
 };
 
 /***/ }),
-/* 79 */
+/* 81 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
-const geometriesBeforeFind = __webpack_require__(80);
+const geometriesBeforeFind = __webpack_require__(82);
 module.exports = {
   before: {
     all: [],
@@ -1984,7 +2241,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 80 */
+/* 82 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Use this hook to manipulate incoming or outgoing data.
@@ -2003,12 +2260,12 @@ module.exports = function (options = {}) {
 };
 
 /***/ }),
-/* 81 */
+/* 83 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Initializes the `totals` service on path `/totals`
-const createService = __webpack_require__(82);
-const hooks = __webpack_require__(84);
+const createService = __webpack_require__(84);
+const hooks = __webpack_require__(86);
 
 module.exports = function (app) {
   const paginate = app.get('paginate');
@@ -2028,11 +2285,11 @@ module.exports = function (app) {
 };
 
 /***/ }),
-/* 82 */
+/* 84 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* eslint-disable no-unused-vars */
-const { Pool } = __webpack_require__(83);
+const { Pool } = __webpack_require__(85);
 
 class Service {
   constructor(options) {
@@ -2115,17 +2372,17 @@ module.exports = function (options) {
 module.exports.Service = Service;
 
 /***/ }),
-/* 83 */
+/* 85 */
 /***/ (function(module, exports) {
 
 module.exports = require("pg");
 
 /***/ }),
-/* 84 */
+/* 86 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
-const totalsBefore = __webpack_require__(85);
+const totalsBefore = __webpack_require__(87);
 module.exports = {
   before: {
     all: [],
@@ -2159,7 +2416,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 85 */
+/* 87 */
 /***/ (function(module, exports) {
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
@@ -2181,12 +2438,12 @@ module.exports = function (options = {}) {
 };
 
 /***/ }),
-/* 86 */
+/* 88 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Initializes the `db` service on path `/db`
-const createService = __webpack_require__(87);
-const hooks = __webpack_require__(88);
+const createService = __webpack_require__(89);
+const hooks = __webpack_require__(90);
 
 module.exports = function (app) {
   const paginate = app.get('paginate');
@@ -2205,7 +2462,7 @@ module.exports = function (app) {
 };
 
 /***/ }),
-/* 87 */
+/* 89 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* eslint-disable no-unused-vars */
@@ -2323,7 +2580,7 @@ module.exports = function (options) {
 module.exports.Service = Service;
 
 /***/ }),
-/* 88 */
+/* 90 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -2361,12 +2618,12 @@ module.exports = {
 };
 
 /***/ }),
-/* 89 */
+/* 91 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Initializes the `extent` service on path `/extent`
-const createService = __webpack_require__(90);
-const hooks = __webpack_require__(91);
+const createService = __webpack_require__(92);
+const hooks = __webpack_require__(93);
 
 module.exports = function (app) {
   const paginate = app.get('paginate');
@@ -2385,7 +2642,7 @@ module.exports = function (app) {
 };
 
 /***/ }),
-/* 90 */
+/* 92 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* eslint-disable no-unused-vars */
@@ -2461,7 +2718,7 @@ module.exports = function (options) {
 module.exports.Service = Service;
 
 /***/ }),
-/* 91 */
+/* 93 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -2499,13 +2756,13 @@ module.exports = {
 };
 
 /***/ }),
-/* 92 */
+/* 94 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Initializes the `styles` service on path `/styles`
 const createService = __webpack_require__(1);
-const createModel = __webpack_require__(93);
-const hooks = __webpack_require__(94);
+const createModel = __webpack_require__(95);
+const hooks = __webpack_require__(96);
 
 module.exports = function (app) {
   const Model = createModel(app);
@@ -2526,7 +2783,7 @@ module.exports = function (app) {
 };
 
 /***/ }),
-/* 93 */
+/* 95 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // See http://docs.sequelizejs.com/en/latest/docs/models-definition/
@@ -2566,6 +2823,7 @@ module.exports = function (app) {
   styles.associate = function (models) {
     // eslint-disable-line no-unused-vars
     models.styles.belongsTo(models.projects, { onDelete: 'CASCADE' }); // generates projectId
+    models.styles.belongsTo(models.datasources, { onDelete: 'CASCADE' }); // generates datasourceId
     models.styles.belongsTo(models.users); // generates userId
   };
 
@@ -2573,13 +2831,14 @@ module.exports = function (app) {
 };
 
 /***/ }),
-/* 94 */
+/* 96 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const { authenticate } = __webpack_require__(2).hooks;
-const { associateCurrentUser } = __webpack_require__(3);
-const stylesBefore = __webpack_require__(95);
+const { associateCurrentUser } = __webpack_require__(4);
+const stylesBefore = __webpack_require__(97);
 const getAfter = __webpack_require__(5);
+const stylesBeforeRemove = __webpack_require__(98);
 module.exports = {
   before: {
     all: [authenticate('jwt')],
@@ -2588,7 +2847,7 @@ module.exports = {
     create: [associateCurrentUser({ idField: 'id' })],
     update: [associateCurrentUser({ idField: 'id' })],
     patch: [associateCurrentUser({ idField: 'id' })],
-    remove: []
+    remove: [stylesBeforeRemove()]
   },
 
   after: {
@@ -2613,7 +2872,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 95 */
+/* 97 */
 /***/ (function(module, exports) {
 
 // Use this hook to manipulate incoming or outgoing data.
@@ -2623,20 +2882,47 @@ module.exports = function (options = {}) {
   // eslint-disable-line no-unused-vars
   return context => {
     context.params.sequelize = {
-      include: [{ model: context.app.services.users.Model, attributes: ['email'] }, { model: context.app.services.projects.Model }]
+      include: [{ model: context.app.services.users.Model, attributes: ['email'] }, { model: context.app.services.projects.Model }, { model: context.app.services.datasources.Model }]
     };
     return context;
   };
 };
 
 /***/ }),
-/* 96 */
+/* 98 */
+/***/ (function(module, exports) {
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
+// Use this hook to manipulate incoming or outgoing data.
+// For more information on hooks see: http://docs.feathersjs.com/api/hooks.html
+
+module.exports = function (options = {}) {
+  // eslint-disable-line no-unused-vars
+  return (() => {
+    var _ref = _asyncToGenerator(function* (context) {
+      yield context.app.service('layers').remove(null, {
+        query: {
+          styleId: context.id
+        }
+      });
+      return context;
+    });
+
+    return function (_x) {
+      return _ref.apply(this, arguments);
+    };
+  })();
+};
+
+/***/ }),
+/* 99 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Initializes the `layers` service on path `/layers`
 const createService = __webpack_require__(1);
-const createModel = __webpack_require__(97);
-const hooks = __webpack_require__(98);
+const createModel = __webpack_require__(100);
+const hooks = __webpack_require__(101);
 
 module.exports = function (app) {
   const Model = createModel(app);
@@ -2657,7 +2943,7 @@ module.exports = function (app) {
 };
 
 /***/ }),
-/* 97 */
+/* 100 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // See http://docs.sequelizejs.com/en/latest/docs/models-definition/
@@ -2714,13 +3000,13 @@ module.exports = function (app) {
 };
 
 /***/ }),
-/* 98 */
+/* 101 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const { authenticate } = __webpack_require__(2).hooks;
-const layersBefore = __webpack_require__(99);
+const layersBefore = __webpack_require__(102);
 const getAfter = __webpack_require__(5);
-const { associateCurrentUser } = __webpack_require__(3);
+const { associateCurrentUser } = __webpack_require__(4);
 module.exports = {
   before: {
     all: [],
@@ -2754,7 +3040,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 99 */
+/* 102 */
 /***/ (function(module, exports) {
 
 // Use this hook to manipulate incoming or outgoing data.
@@ -2771,13 +3057,13 @@ module.exports = function (options = {}) {
 };
 
 /***/ }),
-/* 100 */
+/* 103 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Initializes the `clients` service on path `/clients`
 const createService = __webpack_require__(1);
-const createModel = __webpack_require__(101);
-const hooks = __webpack_require__(102);
+const createModel = __webpack_require__(104);
+const hooks = __webpack_require__(105);
 
 module.exports = function (app) {
   const Model = createModel(app);
@@ -2798,7 +3084,7 @@ module.exports = function (app) {
 };
 
 /***/ }),
-/* 101 */
+/* 104 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // See http://docs.sequelizejs.com/en/latest/docs/models-definition/
@@ -2835,13 +3121,13 @@ module.exports = function (app) {
 };
 
 /***/ }),
-/* 102 */
+/* 105 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
-const clientsBefore = __webpack_require__(103);
+const clientsBefore = __webpack_require__(106);
 const getAfter = __webpack_require__(5);
-const { associateCurrentUser } = __webpack_require__(3);
+const { associateCurrentUser } = __webpack_require__(4);
 module.exports = {
   before: {
     all: [],
@@ -2875,7 +3161,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 103 */
+/* 106 */
 /***/ (function(module, exports) {
 
 // Use this hook to manipulate incoming or outgoing data.
@@ -2892,13 +3178,13 @@ module.exports = function (options = {}) {
 };
 
 /***/ }),
-/* 104 */
+/* 107 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Initializes the `datasourcetypes` service on path `/datasourcetypes`
 const createService = __webpack_require__(1);
-const createModel = __webpack_require__(105);
-const hooks = __webpack_require__(106);
+const createModel = __webpack_require__(108);
+const hooks = __webpack_require__(109);
 
 module.exports = function (app) {
   const Model = createModel(app);
@@ -2919,7 +3205,7 @@ module.exports = function (app) {
 };
 
 /***/ }),
-/* 105 */
+/* 108 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // See http://docs.sequelizejs.com/en/latest/docs/models-definition/
@@ -2951,7 +3237,7 @@ module.exports = function (app) {
 };
 
 /***/ }),
-/* 106 */
+/* 109 */
 /***/ (function(module, exports) {
 
 
@@ -2988,14 +3274,14 @@ module.exports = {
 };
 
 /***/ }),
-/* 107 */
+/* 110 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Initializes the `tiles` service on path `/tiles`
 const zlib = __webpack_require__(14);
-const createService = __webpack_require__(108);
-const hooks = __webpack_require__(109);
-const sharp = __webpack_require__(110);
+const createService = __webpack_require__(111);
+const hooks = __webpack_require__(112);
+const sharp = __webpack_require__(113);
 let empty = null;
 sharp({
   create: {
@@ -3050,14 +3336,14 @@ module.exports = function (app) {
 };
 
 /***/ }),
-/* 108 */
+/* 111 */
 /***/ (function(module, exports, __webpack_require__) {
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 /* eslint-disable no-unused-vars */
 const fs = __webpack_require__(6);
-const path = __webpack_require__(4);
+const path = __webpack_require__(3);
 var MBTiles = __webpack_require__(13);
 
 const port = process.env.PORT || 3030;
@@ -3077,7 +3363,7 @@ class Service {
   get(id, params) {
     return _asyncToGenerator(function* () {
       const mbtilesFile = path.join(filePath, id + '.mbtiles');
-      if (params.query.hasOwnProperty('format')) {
+      if (params.query && params.query.hasOwnProperty('format')) {
         try {
           const z = params.query.z | 0;
           const x = params.query.x | 0;
@@ -3160,7 +3446,7 @@ module.exports = function (options) {
 module.exports.Service = Service;
 
 /***/ }),
-/* 109 */
+/* 112 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -3198,19 +3484,19 @@ module.exports = {
 };
 
 /***/ }),
-/* 110 */
+/* 113 */
 /***/ (function(module, exports) {
 
 module.exports = require("sharp");
 
 /***/ }),
-/* 111 */
+/* 114 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Initializes the `tools` service on path `/tools`
 const createService = __webpack_require__(1);
-const createModel = __webpack_require__(112);
-const hooks = __webpack_require__(113);
+const createModel = __webpack_require__(115);
+const hooks = __webpack_require__(116);
 
 module.exports = function (app) {
   const Model = createModel(app);
@@ -3231,7 +3517,7 @@ module.exports = function (app) {
 };
 
 /***/ }),
-/* 112 */
+/* 115 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // See http://docs.sequelizejs.com/en/latest/docs/models-definition/
@@ -3274,13 +3560,13 @@ module.exports = function (app) {
 };
 
 /***/ }),
-/* 113 */
+/* 116 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
 const { authenticate } = __webpack_require__(2).hooks;
-const { associateCurrentUser } = __webpack_require__(3);
-const toolsBefore = __webpack_require__(114);
+const { associateCurrentUser } = __webpack_require__(4);
+const toolsBefore = __webpack_require__(117);
 const getAfter = __webpack_require__(5);
 module.exports = {
   before: {
@@ -3315,7 +3601,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 114 */
+/* 117 */
 /***/ (function(module, exports) {
 
 // Use this hook to manipulate incoming or outgoing data.
@@ -3332,13 +3618,13 @@ module.exports = function (options = {}) {
 };
 
 /***/ }),
-/* 115 */
+/* 118 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Initializes the `projects-tools` service on path `/projects-tools`
 const createService = __webpack_require__(1);
-const createModel = __webpack_require__(116);
-const hooks = __webpack_require__(117);
+const createModel = __webpack_require__(119);
+const hooks = __webpack_require__(120);
 
 module.exports = function (app) {
   const Model = createModel(app);
@@ -3359,7 +3645,7 @@ module.exports = function (app) {
 };
 
 /***/ }),
-/* 116 */
+/* 119 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // See http://docs.sequelizejs.com/en/latest/docs/models-definition/
@@ -3409,12 +3695,12 @@ module.exports = function (app) {
 };
 
 /***/ }),
-/* 117 */
+/* 120 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const { authenticate } = __webpack_require__(2).hooks;
-const { associateCurrentUser } = __webpack_require__(3);
-const projectsToolsBefore = __webpack_require__(118);
+const { associateCurrentUser } = __webpack_require__(4);
+const projectsToolsBefore = __webpack_require__(121);
 const getAfter = __webpack_require__(5);
 module.exports = {
   before: {
@@ -3449,7 +3735,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 118 */
+/* 121 */
 /***/ (function(module, exports) {
 
 // Use this hook to manipulate incoming or outgoing data.
@@ -3466,13 +3752,13 @@ module.exports = function (options = {}) {
 };
 
 /***/ }),
-/* 119 */
+/* 122 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Initializes the `logos` service on path `/logos`
 const createService = __webpack_require__(1);
-const createModel = __webpack_require__(120);
-const hooks = __webpack_require__(121);
+const createModel = __webpack_require__(123);
+const hooks = __webpack_require__(124);
 
 module.exports = function (app) {
   const Model = createModel(app);
@@ -3493,7 +3779,7 @@ module.exports = function (app) {
 };
 
 /***/ }),
-/* 120 */
+/* 123 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // See http://docs.sequelizejs.com/en/latest/docs/models-definition/
@@ -3532,7 +3818,7 @@ module.exports = function (app) {
 };
 
 /***/ }),
-/* 121 */
+/* 124 */
 /***/ (function(module, exports) {
 
 
@@ -3569,11 +3855,250 @@ module.exports = {
 };
 
 /***/ }),
-/* 122 */
+/* 125 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// Initializes the `codetables` service on path `/codetables`
+const createService = __webpack_require__(126);
+const hooks = __webpack_require__(129);
+
+module.exports = function (app) {
+  const paginate = app.get('paginate');
+
+  const options = {
+    name: 'codetables',
+    paginate
+
+    // Initialize our service with any options it requires
+  };app.use('/codetables', createService(options));
+
+  // Get our initialized service so that we can register hooks and filters
+  const service = app.service('codetables');
+
+  service.hooks(hooks);
+};
+
+/***/ }),
+/* 126 */
+/***/ (function(module, exports, __webpack_require__) {
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
+/* eslint-disable no-unused-vars */
+const xml2js = __webpack_require__(127);
+const path = __webpack_require__(3);
+const fs = __webpack_require__(6);
+const iconv = __webpack_require__(128);
+class Service {
+  constructor(options) {
+    this.options = options || {};
+    this.filePath = process.env.XFM;
+  }
+
+  find(params) {
+    var _this = this;
+
+    return _asyncToGenerator(function* () {
+      const files = yield new Promise(function (resolve, reject) {
+        fs.readdir(_this.filePath, function (err, files) {
+          if (err) {
+            return reject(err);
+          }
+          resolve(files);
+        });
+      });
+      const names = [];
+      files.forEach(function (file) {
+        let p = path.parse(file);
+        if (p.ext === '.xfm') {
+          names.push(p.name);
+        }
+      });
+      return names;
+    })();
+  }
+
+  get(id, params) {
+    return Promise.resolve().then(() => {
+      return new Promise((resolve, reject) => {
+        fs.readFile(path.join(this.filePath, `${id}.xfm`), function (err, data) {
+          if (err) {
+            return reject(err);
+          }
+          resolve(data);
+        });
+      });
+    }).then(data => {
+      let encoding = 'iso-8859-1';
+      if (data[0] === 255) {
+        encoding = 'utf-16';
+      }
+      data = iconv.decode(data, encoding);
+      return new Promise((resolve, reject) => {
+        const parser = new xml2js.Parser();
+        parser.parseString(data, function (err, result) {
+          if (err) {
+            return reject(err);
+          }
+          resolve(result);
+        });
+      });
+    }).then(result => {
+      const json = {
+        id: id,
+        layers: {}
+      };
+      result.GeospatialSchema.Workspace[0].Features[0].feature.forEach(element => {
+        if (element.hasOwnProperty('X34')) {
+          let options = {
+            name: element.$.alias,
+            category: element.$.category
+          };
+          element.X34.forEach(style => {
+            let width = style.WebGisWidth ? parseInt(style.WebGisWidth[0]) : 2;
+            width = width > 2 ? width : 2;
+            const color = style.WebGisColor ? style.WebGisColor[0] : '#000';
+            let dash = null;
+            if (style.WebGisDash) {
+              dash = style.WebGisDash[0].split(' ').map(item => parseInt(item)).filter(item => {
+                return !isNaN(item);
+              });
+              if (dash.length < 2) {
+                dash = null;
+              }
+            }
+            if (element.Symbology[0].$.type === 'linear') {
+              options.type = 'line';
+              options.paint = {
+                'line-color': color,
+                'line-width': width
+              };
+              if (dash) {
+                options.paint['line-dasharray'] = dash;
+              }
+            } else if (element.Symbology[0].$.type === 'cell') {
+              options.type = 'circle';
+              options.paint = {
+                'circle-radius': {
+                  'base': 1.75,
+                  'stops': [[12, 2], [22, 10]]
+                },
+                'circle-opacity': 0.7,
+                'circle-color': color
+                // 'circle-stroke-color': style.WebGisColor ? style.WebGisColor[0] : '#000',
+                // 'circle-stroke-width': 2 // parseInt(style.WebGisWidth[0])
+              };
+            } else if (element.Symbology[0].$.type === 'shape') {
+              options.type = 'line';
+              options.paint = {
+                'line-color': color,
+                'line-width': width
+                /*
+                    'fill-outline-color': style.WebGisColor ? style.WebGisColor[0] : '#000',
+                    'fill-color': style.WebGisFillColor ? style.WebGisFillColor[0] : '#000',
+                    'fill-opacity': style.WebGisFillOpacity && !isNaN(parseFloat(style.WebGisFillOpacity[0])) ? parseFloat(style.WebGisFillOpacity[0]) : 1
+                    */
+              };
+              if (dash) {
+                options.paint['line-dasharray'] = dash;
+              }
+            }
+            json.layers[element.$.name] = options;
+          });
+        }
+      });
+      return json;
+    }).catch(err => {
+      return err;
+    });
+  }
+
+  create(data, params) {
+    return _asyncToGenerator(function* () {
+      return data;
+    })();
+  }
+
+  update(id, data, params) {
+    return _asyncToGenerator(function* () {
+      return data;
+    })();
+  }
+
+  patch(id, data, params) {
+    return _asyncToGenerator(function* () {
+      return data;
+    })();
+  }
+
+  remove(id, params) {
+    return _asyncToGenerator(function* () {
+      return { id };
+    })();
+  }
+}
+
+module.exports = function (options) {
+  return new Service(options);
+};
+
+module.exports.Service = Service;
+
+/***/ }),
+/* 127 */
+/***/ (function(module, exports) {
+
+module.exports = require("xml2js");
+
+/***/ }),
+/* 128 */
+/***/ (function(module, exports) {
+
+module.exports = require("iconv-lite");
+
+/***/ }),
+/* 129 */
+/***/ (function(module, exports) {
+
+
+module.exports = {
+  before: {
+    all: [],
+    find: [],
+    get: [],
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
+  },
+
+  after: {
+    all: [],
+    find: [],
+    get: [],
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
+  },
+
+  error: {
+    all: [],
+    find: [],
+    get: [],
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
+  }
+};
+
+/***/ }),
+/* 130 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Application hooks that run for every service
-const logger = __webpack_require__(123);
+const logger = __webpack_require__(131);
 
 module.exports = {
   before: {
@@ -3608,7 +4133,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 123 */
+/* 131 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // A hook that logs service method before, after and error
@@ -3636,7 +4161,7 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 124 */
+/* 132 */
 /***/ (function(module, exports) {
 
 module.exports = function (app) {
@@ -3707,16 +4232,16 @@ module.exports = function (app) {
 };
 
 /***/ }),
-/* 125 */
+/* 133 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const authentication = __webpack_require__(2);
-const jwt = __webpack_require__(126);
+const jwt = __webpack_require__(134);
 const local = __webpack_require__(9);
 const authManagement = __webpack_require__(10);
 const notifier = __webpack_require__(11);
-const ldap = __webpack_require__(127);
-const LDAPVerifier = __webpack_require__(128);
+const ldap = __webpack_require__(135);
+const LDAPVerifier = __webpack_require__(136);
 
 module.exports = function (app) {
   const config = app.get('authentication');
@@ -3742,19 +4267,19 @@ module.exports = function (app) {
 };
 
 /***/ }),
-/* 126 */
+/* 134 */
 /***/ (function(module, exports) {
 
 module.exports = require("@feathersjs/authentication-jwt");
 
 /***/ }),
-/* 127 */
+/* 135 */
 /***/ (function(module, exports) {
 
 module.exports = require("feathers-authentication-ldap");
 
 /***/ }),
-/* 128 */
+/* 136 */
 /***/ (function(module, exports) {
 
 class LDAPVerifier {
@@ -3796,8 +4321,8 @@ class LDAPVerifier {
     this.service.find(params).then(response => {
       const results = response.data || response;
       if (!results.length) {
-        return this.service.create({ email: user.mail, companyId: '6714a515-bec0-4d2b-a5e4-76d16cb845c0' }).then(response => {
-          return this._normalizeResult(response);
+        return this.service.create({ email: user.mail, name: user.cn, companyId: '6714a515-bec0-4d2b-a5e4-76d16cb845c0' }).then(response => {
+          return this._normalizeResult([response]);
         });
       }
       return this._normalizeResult(response);
@@ -3812,11 +4337,11 @@ class LDAPVerifier {
 module.exports = LDAPVerifier;
 
 /***/ }),
-/* 129 */
+/* 137 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Sequelize = __webpack_require__(0);
-const seed = __webpack_require__(130);
+const seed = __webpack_require__(138);
 module.exports = function (app) {
   const connectionString = app.get('postgres');
   const sequelize = new Sequelize(connectionString, {
@@ -3851,15 +4376,15 @@ module.exports = function (app) {
 };
 
 /***/ }),
-/* 130 */
+/* 138 */
 /***/ (function(module, exports, __webpack_require__) {
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
-const rolesData = __webpack_require__(131);
+const rolesData = __webpack_require__(139);
 // const usersData = require('./users.js')
-const companiesData = __webpack_require__(133);
-const datasourcetypesData = __webpack_require__(134);
+const companiesData = __webpack_require__(140);
+const datasourcetypesData = __webpack_require__(141);
 const Tiler = __webpack_require__(12);
 
 module.exports = function (app) {
@@ -3921,7 +4446,7 @@ function tile() {
 }
 
 /***/ }),
-/* 131 */
+/* 139 */
 /***/ (function(module, exports) {
 
 const system = {
@@ -3939,8 +4464,7 @@ const basic = {
 module.exports = [system, admin, basic];
 
 /***/ }),
-/* 132 */,
-/* 133 */
+/* 140 */
 /***/ (function(module, exports) {
 
 const clients = [{
@@ -4060,7 +4584,7 @@ module.exports = clients.map(client => {
 });
 
 /***/ }),
-/* 134 */
+/* 141 */
 /***/ (function(module, exports) {
 
 const database = {
